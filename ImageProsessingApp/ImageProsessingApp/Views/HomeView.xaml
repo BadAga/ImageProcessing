@@ -5,19 +5,19 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:ImageProsessingApp.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="600" 
+             d:DesignHeight="600" d:DesignWidth="900" 
              FontFamily="Segoe UI Light"
-             FontSize="14">
+             FontSize="16">
     <UserControl.Resources>
         <SolidColorBrush  x:Key="LightTheme.Background" Color="#F6F6F6"/>
         <SolidColorBrush  x:Key="LightTheme.Transitional" Color="#98DED9"/>
         <SolidColorBrush  x:Key="LightTheme.TransitionalDark" Color="#6bd0c9"/>
         <SolidColorBrush  x:Key="LightTheme.AccentColorLight" Color="#C7FFD8"/>
-        <SolidColorBrush  x:Key="LightTheme.AccentColorDark" Color="#161D6F"/>        
-        <SolidColorBrush  x:Key="LightTheme.Foreground" Color="#191818"/>        
+        <SolidColorBrush  x:Key="LightTheme.AccentColorDark" Color="#161D6F"/>
+        <SolidColorBrush  x:Key="LightTheme.Foreground" Color="#191818"/>
     </UserControl.Resources>
 
-    <Grid Background="{DynamicResource LightTheme.Background}"> 
+    <Grid Background="{DynamicResource LightTheme.Background}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20"/>
             <ColumnDefinition Width="*"/>
@@ -35,6 +35,7 @@
                 <ColumnDefinition  Width="*"/>
                 <ColumnDefinition  Width="6*"/>
             </Grid.ColumnDefinitions>
+            <!--about btn-->
             <Button Grid.Row="0" Grid.Column="0"                    
                     Content="About">
                 <Button.Style>
@@ -43,20 +44,20 @@
                         <Setter Property="Foreground" Value="{DynamicResource LightTheme.Foreground}"/>
                         <Setter Property="Margin" Value="3"/>
                         <Setter Property="FontSize" Value="17"/>
-                        <Setter Property="BorderBrush" Value="{DynamicResource LightTheme.TransitionalDark}"/>
                         <Setter Property="Cursor" Value="Hand"/>
-                        
+
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="{DynamicResource LightTheme.TransitionalDark}"/>
                             </Trigger>
-                        </Style.Triggers>                        
+                        </Style.Triggers>
                     </Style>
                 </Button.Style>
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border CornerRadius="15" 
                                 BorderThickness="2"
+                                BorderBrush="{DynamicResource LightTheme.TransitionalDark}"
                                 Padding="2"
                                 Background="{TemplateBinding Background}">
                             <ContentPresenter VerticalAlignment="Center" 
@@ -66,11 +67,161 @@
                 </Button.Template>
             </Button>
         </Grid>
+        <!--main-->
+        <Grid Grid.Row="1" Grid.Column="1" Margin="30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="25"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <!--load btn-->
+            <Button Grid.Row="0" Grid.Column="0"                
+                    Content="Load an Image"
+                    FontFamily="Segoe UI" FontWeight="DemiBold"
+                    Margin="5,5,200,5">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="{DynamicResource LightTheme.Transitional}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource LightTheme.Foreground}"/>
+                        <Setter Property="Margin" Value="3"/>
+                        <Setter Property="FontSize" Value="20"/>
+                        <Setter Property="Cursor" Value="Hand"/>
 
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource LightTheme.TransitionalDark}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="15" 
+                                BorderThickness="2"
+                                BorderBrush="{DynamicResource LightTheme.AccentColorLight}"
+                                Padding="5"
+                                Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center" 
+                                              HorizontalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            <!--before image-->
+            <Border BorderThickness="2"
+                    Grid.Column="0" Grid.Row="1" Grid.RowSpan="2"
+                    BorderBrush="{DynamicResource LightTheme.AccentColorLight}">
+                <Image Source="/Images/lea.jpg"
+                       Margin="2"/>
+            </Border>
+
+            <!--after image-->
+            <Border BorderThickness="2"
+                    Grid.Column="2" Grid.Row="1" Grid.RowSpan="2"
+                    BorderBrush="{DynamicResource LightTheme.AccentColorLight}">
+                <Image Source="/Images/lea.jpg"
+                       Margin="2"/>
+            </Border>
+            
+            <StackPanel Grid.Row="3" Grid.Column="2">
+                <!--save btn-->
+                <Button  Content="Save"
+                         Margin="5"
+                         FontFamily="Segoe UI" FontWeight="DemiBold" Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="{DynamicResource LightTheme.AccentColorLight}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource LightTheme.Foreground}"/>
+                            <Setter Property="Margin" Value="3"/>
+                            <Setter Property="FontSize" Value="20"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource LightTheme.TransitionalDark}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border CornerRadius="15" 
+                                BorderThickness="2"
+                                BorderBrush="{DynamicResource LightTheme.TransitionalDark}"
+                                Padding="5"
+                                Background="{TemplateBinding Background}">
+                                <ContentPresenter VerticalAlignment="Center" 
+                                              HorizontalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+            <Grid Grid.Row="3" Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <!--run btn-->
+                <Button  Grid.Column="1"
+                         Content="Run"
+                         Margin="5"
+                         FontFamily="Segoe UI" FontWeight="DemiBold" Cursor="Hand">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="{DynamicResource LightTheme.AccentColorLight}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource LightTheme.Foreground}"/>
+                            <Setter Property="Margin" Value="3"/>
+                            <Setter Property="FontSize" Value="20"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource LightTheme.TransitionalDark}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border CornerRadius="15" 
+                                BorderThickness="2"
+                                BorderBrush="{DynamicResource LightTheme.Transitional}"
+                                Padding="15"
+                                Background="{TemplateBinding Background}">
+                                <ContentPresenter VerticalAlignment="Center" 
+                                              HorizontalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <CheckBox>
+                        <TextBlock Text="Asm DDL"/>
+                    </CheckBox>
+                    <CheckBox>
+                        <TextBlock Text="C# DDL"/>
+                    </CheckBox>
+                </StackPanel>
+            </Grid>
+        </Grid>
+        <!--background-->
         <Rectangle Grid.Row="1" Grid.Column="1"
                   Fill="Transparent"                              
                   Stretch="Fill"
-                  Panel.ZIndex="-2"                           
+                  Panel.ZIndex="-3"                           
                   RadiusX="10"
                   RadiusY="10"
                   StrokeThickness="10"
@@ -79,11 +230,36 @@
         <Rectangle Grid.Row="1" Grid.Column="1"
                   Fill="Transparent"                              
                   Stretch="Fill"
-                  Panel.ZIndex="-1"                           
+                  Panel.ZIndex="-2"                           
                   RadiusX="10"
                   RadiusY="10"
                   StrokeThickness="3"
                   Stroke="{DynamicResource LightTheme.Transitional}"
                   Margin="12"/>
+        <Image Panel.ZIndex="-1"
+               Source="/Images/shapes1.png"
+               Margin="493,-6,-178,321" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Grid.RowSpan="2" Grid.Column="1">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="230.422"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
+        <Image Panel.ZIndex="-1"
+               Source="/Images/shapes2.png"
+               Margin="440,329,-115,-12" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2" Grid.RowSpan="2" Grid.Column="1" Grid.Row="1">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="1074.055"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
     </Grid>
+
 </UserControl>

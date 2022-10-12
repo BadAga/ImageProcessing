@@ -105,5 +105,14 @@
     <Folder Include="Model\" />
     <Folder Include="ViewModel\" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\lea.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\shapes2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\shapes1.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
