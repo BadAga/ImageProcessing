@@ -7,6 +7,6 @@
         mc:Ignorable="d"
         Title="ImageThinningApp" Height="600" Width="900">
     <Grid>
-        <views:HomeView/>
+        <views:HomeView DataContext="{Binding CurrentViewModel}"/>
     </Grid>
 </Window>

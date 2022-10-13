@@ -370,6 +370,7 @@
             <Button Grid.Row="0" Grid.Column="0"                
                     Content="Load an Image"
                     FontFamily="Segoe UI" FontWeight="DemiBold"
+                    Command="{Binding LoadImageCommand}"
                     Margin="5,5,200,5">
                 <Button.Style>
                     <Style TargetType="Button">
@@ -403,7 +404,7 @@
             <Border BorderThickness="2"
                     Grid.Column="0" Grid.Row="1" Grid.RowSpan="2"
                     BorderBrush="{DynamicResource LightTheme.AccentColorLight}">
-                <Image Source="/Images/lea.jpg"
+                <Image Source="{Binding BeforeImagePath, Mode=TwoWay}"
                        Margin="2"/>
             </Border>
 
@@ -518,12 +519,14 @@
                 <!--ddl choosing-->
                 <StackPanel HorizontalAlignment="Center"
                             VerticalAlignment="Center">
-                    <CheckBox>
-                        <TextBlock Text="Asm DDL"/>
-                    </CheckBox>
-                    <CheckBox>
-                        <TextBlock Text="C# DDL"/>
-                    </CheckBox>
+                    <RadioButton VerticalContentAlignment="Center" Margin="2"
+                                 IsChecked="{Binding AsmDDLChosen}">
+                        Asm DDL
+                    </RadioButton>
+                    <RadioButton VerticalContentAlignment="Center"  Margin="2"
+                                 IsChecked="{Binding CDDLChosen}">
+                       C# DDL
+                    </RadioButton>
                 </StackPanel>
                 <!--slider-->
                 <TextBlock Grid.Column="0" Grid.ColumnSpan="2"
@@ -536,11 +539,14 @@
                     <TextBox Text="{Binding ElementName=slValue,
                              Path=Value, UpdateSourceTrigger=PropertyChanged}"
                              DockPanel.Dock="Right" TextAlignment="Right" Width="40" />
-                    <Slider Style="{DynamicResource SliderStyle1}" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" VerticalAlignment="Center"
+                    <Slider Style="{DynamicResource SliderStyle1}" Grid.Column="0" Grid.ColumnSpan="2" 
+                            Grid.Row="2" 
+                            VerticalAlignment="Center"
                             Margin="2"
                             Minimum="1"
-                            Maximum="32"
+                            Maximum="{Binding NumberOfThreads}"
                             TickPlacement="BottomRight"
+                            Value="{Binding NumberOfThreadsChosen,UpdateSourceTrigger=PropertyChanged}"
                             IsSnapToTickEnabled="True" Name="slValue"/>
                 </DockPanel>
                
