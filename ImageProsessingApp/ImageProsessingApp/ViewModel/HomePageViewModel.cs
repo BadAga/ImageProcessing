@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ImageProsessingApp.ViewModel
 {
@@ -21,7 +22,7 @@ namespace ImageProsessingApp.ViewModel
             }
         }
 
-        private int numberOfThreads=16;//default
+        private int numberOfThreads;
         public int NumberOfThreads
         {
             get { return numberOfThreads; }
@@ -66,6 +67,7 @@ namespace ImageProsessingApp.ViewModel
         }
 
         //commands
+        public ICommand RunCommand { get; set; }
 
         public RelayCommand LoadImageCommand { get; }
 
@@ -75,6 +77,8 @@ namespace ImageProsessingApp.ViewModel
         {
             BeforeImagePath = "/Images/lea.jpg"; //as a default image
             LoadImageCommand = new RelayCommand(LoadImage);
+            NumberOfThreads = Environment.ProcessorCount;
+            RunCommand = new RunCommand(this);
         }
 
         private void LoadImage(object o)

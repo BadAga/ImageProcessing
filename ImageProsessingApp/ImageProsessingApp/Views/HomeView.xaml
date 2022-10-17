@@ -485,6 +485,7 @@
                 </Grid.RowDefinitions>
                 <!--run btn-->
                 <Button  Grid.Column="1"
+                         Command="{Binding RunCommand}"
                          Content="Run"
                          Margin="5"
                          FontFamily="Segoe UI" FontWeight="DemiBold" Cursor="Hand">
