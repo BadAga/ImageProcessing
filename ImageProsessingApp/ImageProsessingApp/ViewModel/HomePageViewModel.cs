@@ -1,4 +1,5 @@
 ﻿using ImageProsessingApp.Commands;
+using ImageProsessingApp.Model;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,13 @@ namespace ImageProsessingApp.ViewModel
             set { beforeImagePath = value; OnPropertyChanged(nameof(BeforeImagePath)); }
         }
 
+        private String afterImagePath;
+        public String AfterImagePath
+        {
+            get { return afterImagePath; }
+            set { afterImagePath = value; OnPropertyChanged(nameof(AfterImagePath)); }
+        }
+
         private bool cDDLChosen=false;//as default
         public bool CDDLChosen
         {
@@ -66,20 +74,24 @@ namespace ImageProsessingApp.ViewModel
             }
         }
 
-        //commands
-        public ICommand RunCommand { get; set; }
-
-        public RelayCommand LoadImageCommand { get; }
-
-        public RelayCommand SaveImageCommand { get; }
+        public GammaCorrection GCorecction { get; set; }
 
         public HomePageViewModel()
         {
-            BeforeImagePath = "/Images/lea.jpg"; //as a default image
+            BeforeImagePath = "\\Images\\lea.jpg"; //as a default image
+
+            GCorecction = new GammaCorrection();
             LoadImageCommand = new RelayCommand(LoadImage);
             NumberOfThreads = Environment.ProcessorCount;
-            RunCommand = new RunCommand(this);
+          
         }
+
+        //commands
+        
+
+        public RelayCommand LoadImageCommand { get; }
+
+        public RelayCommand SaveImageCommand { get; }        
 
         private void LoadImage(object o)
         {
@@ -90,6 +102,7 @@ namespace ImageProsessingApp.ViewModel
             if (open.ShowDialog() == true)
                 BeforeImagePath = open.FileName;
         }
+       
 
     }
 }

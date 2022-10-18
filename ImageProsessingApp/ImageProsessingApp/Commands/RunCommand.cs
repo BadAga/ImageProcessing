@@ -20,7 +20,17 @@ namespace ImageProsessingApp.Commands
 
         public override void Execute(object parameter)
         {
-            
+            hpViewModel.GCorecction.BeforeImageSource = hpViewModel.BeforeImagePath;
+            hpViewModel.GCorecction.ResultsFilename = "Result.jpg";
+
+            hpViewModel.GCorecction.SetBitmap();
+
+            hpViewModel.GCorecction.RedComponent = 2;
+            hpViewModel.GCorecction.GreenComponent= 1;
+            hpViewModel.GCorecction.BlueComponent= 0.9;
+
+            hpViewModel.GCorecction.ApplyRGBGamma();       
+
         }
 
         public override bool CanExecute(object parameter)
