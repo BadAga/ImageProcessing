@@ -30,21 +30,21 @@ namespace ImageProsessingApp.ViewModel
             set { numberOfThreads = value; OnPropertyChanged(nameof(NumberOfThreads)); }
         }
 
-        private String beforeImagePath;
+        private String beforeImagePath="/Images/lea.jpg";
         public String BeforeImagePath
         {
             get { return beforeImagePath;}
             set { beforeImagePath = value; OnPropertyChanged(nameof(BeforeImagePath)); }
         }
 
-        private String afterImagePath;
+        private String afterImagePath= "/Images/lea.jpg";
         public String AfterImagePath
         {
             get { return afterImagePath; }
             set { afterImagePath = value; OnPropertyChanged(nameof(AfterImagePath)); }
         }
 
-        private bool cDDLChosen=false;//as default
+        private bool cDDLChosen=false;//as default     
         public bool CDDLChosen
         {
             get { return cDDLChosen; }
@@ -53,6 +53,7 @@ namespace ImageProsessingApp.ViewModel
                 if (value) //onlu=y one of the ddl's can be chosen.
                 {
                     AsmDDLChosen = false;
+                    IsAnyDDLChosen = true;
                 }
                 cDDLChosen = value; 
                 OnPropertyChanged(nameof(CDDLChosen));
@@ -68,18 +69,24 @@ namespace ImageProsessingApp.ViewModel
                 if (value)
                 {
                     CDDLChosen = false;
+                    IsAnyDDLChosen = true;
                 }
                 asmDDLChosen = value;
                 OnPropertyChanged(nameof(AsmDDLChosen));
             }
         }
 
+        private bool isAnyDDLChosen = false;
+        public bool IsAnyDDLChosen
+        {
+            get { return isAnyDDLChosen; }
+            set { isAnyDDLChosen = value; OnPropertyChanged(nameof(IsAnyDDLChosen)); }
+        }
+
         public GammaCorrection GCorecction { get; set; }
 
         public HomePageViewModel()
         {
-            BeforeImagePath = "\\Images\\lea.jpg"; //as a default image
-
             GCorecction = new GammaCorrection();
             LoadImageCommand = new RelayCommand(LoadImage);
             NumberOfThreads = Environment.ProcessorCount;

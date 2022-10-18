@@ -414,6 +414,7 @@
                     Grid.Column="2" Grid.Row="1" Grid.RowSpan="2"
                     BorderBrush="{DynamicResource LightTheme.AccentColorLight}">
                 <Image x:Name="AfterImage"
+                       Source="{Binding AfterImagePath}"
                        Margin="2"/>
             </Border>
             <Grid Grid.Row="3" Grid.Column="2">
@@ -488,6 +489,7 @@
                 <Button  Grid.Column="1"
                          Content="Run"
                          Margin="5"
+                         IsEnabled="{Binding IsAnyDDLChosen}"
                          FontFamily="Segoe UI" FontWeight="DemiBold" Cursor="Hand" Click="Button_Click">
                     <Button.Style>
                         <Style TargetType="Button">
