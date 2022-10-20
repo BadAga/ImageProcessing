@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ImageProsessingApp.ViewModel
 {
@@ -30,15 +31,22 @@ namespace ImageProsessingApp.ViewModel
             set { numberOfThreads = value; OnPropertyChanged(nameof(NumberOfThreads)); }
         }
 
-        private String beforeImagePath="/Images/lea.jpg";
+        private double gammaParam=2.2;
+        public double GammaParam
+        {
+            get { return gammaParam; }
+            set { gammaParam = value; OnPropertyChanged(nameof(GammaParam)); }
+        }
+
+        private String beforeImagePath;
         public String BeforeImagePath
         {
             get { return beforeImagePath;}
             set { beforeImagePath = value; OnPropertyChanged(nameof(BeforeImagePath)); }
         }
 
-        private String afterImagePath= "/Images/lea.jpg";
-        public String AfterImagePath
+        private ImageSource afterImagePath;
+        public ImageSource AfterImagePath
         {
             get { return afterImagePath; }
             set { afterImagePath = value; OnPropertyChanged(nameof(AfterImagePath)); }
@@ -89,13 +97,14 @@ namespace ImageProsessingApp.ViewModel
         {
             GCorecction = new GammaCorrection();
             LoadImageCommand = new RelayCommand(LoadImage);
-            NumberOfThreads = Environment.ProcessorCount;
-          
+            RunCommand = new RelayCommand(RunCorraction);
+            NumberOfThreadsChosen = Environment.ProcessorCount;
+            NumberOfThreads = 64;
         }
 
         //commands
-        
 
+        public RelayCommand RunCommand { get; }
         public RelayCommand LoadImageCommand { get; }
 
         public RelayCommand SaveImageCommand { get; }        
@@ -110,6 +119,15 @@ namespace ImageProsessingApp.ViewModel
                 BeforeImagePath = open.FileName;
         }
        
+        private void RunCorraction(object o)
+        {
+            if (this.beforeImagePath != null)
+            {
+                GCorecction = new GammaCorrection(this.BeforeImagePath,this.GammaParam);
+                GCorecction.ApplyGammaCorrection();
+                this.AfterImagePath = GCorecction.GetCorrectedImageSource();
+            }
+        }
 
     }
 }
