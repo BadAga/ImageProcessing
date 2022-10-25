@@ -22,7 +22,14 @@ namespace ImageProsessingApp.Model
         public String ResultsFilename { get; set; } 
         public double Gamma { get; set; }
         public int NumberOfThreads { get; set; }
+
         private byte[] result;
+
+        private double c = 1d;
+
+        private byte b = new byte();
+
+        private int coordinates = 0;
 
         public GammaCorrection()
         {
@@ -44,7 +51,7 @@ namespace ImageProsessingApp.Model
             this.SourceBitmap = (Bitmap)Image.FromFile(this.BeforeImageSource);
         }
 
-        public void ApplyGammaCorrection( double c = 1d)
+        public void ApplyGammaCorrection()
         {
             int width = SourceBitmap.Width;
             int height = SourceBitmap.Height;
@@ -70,9 +77,9 @@ namespace ImageProsessingApp.Model
                     current = y * srcData.Stride + x * 4;
                     for (int i = 0; i < cChannels; i++)
                     {
-                        int coordinates = current + i;
-                        byte b = buffer[coordinates];
-                        ApplyGammaToPixel(b, c, coordinates);
+                        this.coordinates = current + i;
+                        this.b = buffer[coordinates];
+                        ApplyGammaToPixel();
                     }
                     result[current + 3] = 255;
                 }
@@ -95,60 +102,60 @@ namespace ImageProsessingApp.Model
             return this.AfterImageSource;
         }
 
-        private void GammaCorrectionInThreads(double c = 1d)
+        //private void GammaCorrectionInThreads(double c = 1d)
+        //{
+        //    List<Thread> workers = new List<Thread>();
+        //    for (int i = 0; i < this.NumberOfThreads; i++)
+        //    {
+        //        //Thread t = new Thread(ApplyGammaToPixel());
+        //        //workers.Add(t);
+        //    }
+
+        //    int width = SourceBitmap.Width;
+        //    int height = SourceBitmap.Height;
+        //    BitmapData srcData = SourceBitmap.LockBits(new Rectangle(0, 0, width, height),
+        //                                         ImageLockMode.ReadOnly,
+        //                                         System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        //    int bytes = srcData.Stride * srcData.Height;
+
+        //    byte[] buffer = new byte[bytes];
+        //    byte[] result = new byte[bytes];
+        //    Marshal.Copy(srcData.Scan0, buffer, 0, bytes);
+
+        //    SourceBitmap.UnlockBits(srcData);
+
+        //    int current = 0;
+        //    int cChannels = 3;
+
+        //    for (int y = 0; y < height; y++)
+        //    {
+        //        for (int x = 0; x < width; x++)
+        //        {
+        //            current = y * srcData.Stride + x * 4;
+        //            for (int i = 0; i < cChannels; i++)
+        //            {
+        //                double range = (double)buffer[current + i] / 255;
+        //                double correction = c * Math.Pow(range, Gamma);
+        //                result[current + i] = (byte)(correction * 255);
+        //            }
+        //            result[current + 3] = 255;
+        //        }
+        //    }
+
+        //    Bitmap resImg = new Bitmap(width, height);
+
+        //    BitmapData resData = resImg.LockBits(new Rectangle(0, 0, width, height),
+        //                                        ImageLockMode.WriteOnly,
+        //                                        System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+        //    Marshal.Copy(result, 0, resData.Scan0, bytes);
+        //    resImg.UnlockBits(resData);
+        //    this.SetCorrectedAfterImage(resImg);
+        //}
+        private void ApplyGammaToPixel()
         {
-            List<Thread> workers = new List<Thread>();
-            for (int i = 0; i < this.NumberOfThreads; i++)
-            {
-                //Thread t = new Thread(ApplyGammaToPixel());
-                //workers.Add(t);
-            }
-
-            int width = SourceBitmap.Width;
-            int height = SourceBitmap.Height;
-            BitmapData srcData = SourceBitmap.LockBits(new Rectangle(0, 0, width, height),
-                                                 ImageLockMode.ReadOnly,
-                                                 System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            int bytes = srcData.Stride * srcData.Height;
-
-            byte[] buffer = new byte[bytes];
-            byte[] result = new byte[bytes];
-            Marshal.Copy(srcData.Scan0, buffer, 0, bytes);
-
-            SourceBitmap.UnlockBits(srcData);
-
-            int current = 0;
-            int cChannels = 3;
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    current = y * srcData.Stride + x * 4;
-                    for (int i = 0; i < cChannels; i++)
-                    {
-                        double range = (double)buffer[current + i] / 255;
-                        double correction = c * Math.Pow(range, Gamma);
-                        result[current + i] = (byte)(correction * 255);
-                    }
-                    result[current + 3] = 255;
-                }
-            }
-
-            Bitmap resImg = new Bitmap(width, height);
-
-            BitmapData resData = resImg.LockBits(new Rectangle(0, 0, width, height),
-                                                ImageLockMode.WriteOnly,
-                                                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            Marshal.Copy(result, 0, resData.Scan0, bytes);
-            resImg.UnlockBits(resData);
-            this.SetCorrectedAfterImage(resImg);
-        }
-        private void ApplyGammaToPixel(byte b,double c,int coordinates)
-        {
-            double range = (double)b / 255;
-            double correction = c * Math.Pow(range, this.Gamma);
-            this.result[coordinates] = (byte)(correction * 255);
+            double range = (double)this.b / 255;
+            double correction = this.c * Math.Pow(range, this.Gamma);
+            this.result[this.coordinates] = (byte)(correction * 255);
         }
         private void SetCorrectedAfterImage(Bitmap correctedBitmap)
         {
