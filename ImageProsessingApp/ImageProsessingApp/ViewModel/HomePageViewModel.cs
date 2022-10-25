@@ -123,7 +123,7 @@ namespace ImageProsessingApp.ViewModel
         {
             if (this.beforeImagePath != null)
             {
-                GCorecction = new GammaCorrection(this.BeforeImagePath,this.GammaParam);
+                GCorecction = new GammaCorrection(this.BeforeImagePath,this.GammaParam,this.NumberOfThreadsChosen);
                 GCorecction.ApplyGammaCorrection();
                 this.AfterImagePath = GCorecction.GetCorrectedImageSource();
             }

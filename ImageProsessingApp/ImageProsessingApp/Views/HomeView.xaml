@@ -411,7 +411,7 @@
             </Border>
             <TextBlock Grid.Column="0" Grid.Row="1" Grid.RowSpan="2"
                        Panel.ZIndex="-2"
-                       Margin="100"
+                       Margin="80"
                        VerticalAlignment="Center"  HorizontalAlignment="Center"
                        Text="Upload an image and set parameters below to apply correction"
                        TextWrapping="Wrap" TextAlignment="Center"
