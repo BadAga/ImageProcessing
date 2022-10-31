@@ -433,7 +433,7 @@
                        TextWrapping="Wrap" TextAlignment="Center"
                        Foreground="{DynamicResource LightTheme.ForegroundLight}"
                        FontSize="12"/>
-            <Grid Grid.Row="3" Grid.Column="2">
+            <Grid Grid.Row="3" Grid.Column="2" Cursor="Hand">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
@@ -446,6 +446,8 @@
                 <Button  Grid.Column="0" Grid.ColumnSpan="2"
                          Content="Save"
                          Margin="5"
+                         Command="{Binding SaveImageCommand}"
+                         IsEnabled="{Binding CanSaveResult}"
                          FontFamily="Segoe UI" FontWeight="DemiBold" Cursor="Hand">
                     <Button.Style>
                         <Style TargetType="Button">

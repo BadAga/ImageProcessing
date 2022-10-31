@@ -3,11 +3,16 @@ using ImageProsessingApp.Model;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace ImageProsessingApp.ViewModel
 {
@@ -91,13 +96,20 @@ namespace ImageProsessingApp.ViewModel
             set { isAnyDDLChosen = value; OnPropertyChanged(nameof(IsAnyDDLChosen)); }
         }
 
+        private bool canSaveResult = false;
+        public bool CanSaveResult
+        {
+            get { return canSaveResult; }
+            set { canSaveResult = value; OnPropertyChanged(nameof(CanSaveResult)); }
+        }
         public GammaCorrection GCorecction { get; set; }
-
+        /// ///////////////////////////////
         public HomePageViewModel()
         {
             GCorecction = new GammaCorrection();
             LoadImageCommand = new RelayCommand(LoadImage);
             RunCommand = new RelayCommand(RunCorraction);
+            SaveImageCommand = new RelayCommand(SaveResultImage);
             NumberOfThreadsChosen = Environment.ProcessorCount;
             NumberOfThreads = 64;
         }
@@ -106,7 +118,6 @@ namespace ImageProsessingApp.ViewModel
 
         public RelayCommand RunCommand { get; }
         public RelayCommand LoadImageCommand { get; }
-
         public RelayCommand SaveImageCommand { get; }        
 
         private void LoadImage(object o)
@@ -126,8 +137,27 @@ namespace ImageProsessingApp.ViewModel
                 GCorecction = new GammaCorrection(this.BeforeImagePath,this.GammaParam,this.NumberOfThreadsChosen);
                 GCorecction.ApplyGammaCorrection();
                 this.AfterImagePath = GCorecction.GetCorrectedImageSource();
+                CanSaveResult = true;
             }
         }
 
+        private void SaveResultImage(object o)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Title = "Save picture as ";
+            save.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp)|*.jpg; *.jpeg; *.gif; *.bmp";
+            if (GCorecction.ResultImage != null)
+            {
+                if (save.ShowDialog() == true)
+                {
+                    JpegBitmapEncoder jpg = new JpegBitmapEncoder();
+                    jpg.Frames.Add(BitmapFrame.Create(GCorecction.ResultImage));
+                    using (Stream stm = File.Create(save.FileName))
+                    {
+                        jpg.Save(stm);
+                    }
+                }
+            }
+        }
     }
 }
