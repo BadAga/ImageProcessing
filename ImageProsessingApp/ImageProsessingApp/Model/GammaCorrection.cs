@@ -11,6 +11,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Threading;
 using System.Security.AccessControl;
+using ImageProsessingApp.Model.Mulithraed;
+using System.Collections.Concurrent;
 
 namespace ImageProsessingApp.Model
 {
@@ -27,6 +29,7 @@ namespace ImageProsessingApp.Model
         public double Gamma { get; set; }
         public int NumberOfThreads { get; set; }
 
+        public ThreadWorker ThreadWorker { get; set; }
         private byte[] result;
 
         private double c = 1d;
@@ -49,6 +52,8 @@ namespace ImageProsessingApp.Model
             this.ResultsFilename = String.Empty;
             this.Gamma = gammaParam;
             this.NumberOfThreads = numberOfThreads;
+            ThreadWorker  = new ThreadWorker(this.NumberOfThreads);
+
         }
         public void SetBitmap()
         {
@@ -73,7 +78,7 @@ namespace ImageProsessingApp.Model
 
             int current = 0;
             int cChannels = 3;
-
+           
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -82,8 +87,8 @@ namespace ImageProsessingApp.Model
                     for (int i = 0; i < cChannels; i++)
                     {
                         this.coordinates = current + i;
-                        this.b = buffer[coordinates];
-                        ApplyGammaToPixel();
+                        this.b = buffer[this.coordinates];
+                        ApplyGammaToPixel();                       
                     }
                     result[current + 3] = 255;
                 }
@@ -106,14 +111,66 @@ namespace ImageProsessingApp.Model
             return this.AfterImageSource;
         }
 
-        private void GammaCorrectionInThreads(double c = 1d)
+        public void GammaCorrectionInThreads(double c = 1d)
         {
-            List<Thread> workers = new List<Thread>();
-            for (int i = 0; i < this.NumberOfThreads; i++)
+            int width = SourceBitmap.Width;
+            int height = SourceBitmap.Height;
+            BitmapData srcData = SourceBitmap.LockBits(new Rectangle(0, 0, width, height),
+                                                 ImageLockMode.ReadOnly,
+                                                 System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            int bytes = srcData.Stride * srcData.Height;
+
+            byte[] buffer = new byte[bytes];
+            result = new byte[bytes];
+
+            Marshal.Copy(srcData.Scan0, buffer, 0, bytes);
+
+            SourceBitmap.UnlockBits(srcData);
+
+            int current = 0;
+            int cChannels = 3;
+
+            List<WaitHandle> waitingRoomList = new List<WaitHandle>();
+            for (int y = 0; y < height; y++)
             {
-                Thread t = new Thread(new ThreadStart(ApplyGammaToPixel));
-                workers.Add(t);
+                for (int x = 0; x < width; x++)
+                {
+                    current = y * srcData.Stride + x * 4;
+                    for (int i = 0; i < cChannels; i++)
+                    {
+                        //parametry do przekazania metodzie ApplyGammaToPixelParam
+                        int coordinates = current + i;
+                        byte b = buffer[coordinates];
+                        double range = (double)b / 255;
+                        //////
+                        Action<double,int> action= ApplyGammaToPixelParam;
+                        PixelChange pChange = new PixelChange(action,range,coordinates);
+
+                        WaitHandle currentWaitHandle = this.ThreadWorker.AddPixelChange(pChange);
+                        waitingRoomList.Add(currentWaitHandle);
+                        //ApplyGammaToPixel();
+                        if (waitingRoomList.Count == 60)
+                        {
+                            foreach (var wh in waitingRoomList)
+                            {
+                                wh.WaitOne();
+                            }
+                            waitingRoomList.Clear();
+                        }
+                    }
+                    result[current + 3] = 255;                    
+                }
             }
+             
+            Bitmap resImg = new Bitmap(width, height);
+
+            BitmapData resData = resImg.LockBits(new Rectangle(0, 0, width, height),
+                                                ImageLockMode.WriteOnly,
+                                                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            Marshal.Copy(this.result, 0, resData.Scan0, bytes);
+            resImg.UnlockBits(resData);
+            this.SetCorrectedAfterImage(resImg);
         }
                  private void ApplyGammaToPixel()
                 {
@@ -121,6 +178,12 @@ namespace ImageProsessingApp.Model
                     double correction = this.c * Math.Pow(range, this.Gamma);
                     this.result[this.coordinates] = (byte)(correction * 255);
                 }
+                private void ApplyGammaToPixelParam(double range,int coordinates)
+                {
+                    double correction = this.c * Math.Pow(range, this.Gamma);
+                    this.result[coordinates] = (byte)(correction * 255);
+                }
+
                 private void SetCorrectedAfterImage(Bitmap correctedBitmap)
                 {
                     using (MemoryStream memory = new MemoryStream())
@@ -136,6 +199,6 @@ namespace ImageProsessingApp.Model
                         AfterImageSource = bitmapImage;
                     }
                 }
-       
+
     }
 }
