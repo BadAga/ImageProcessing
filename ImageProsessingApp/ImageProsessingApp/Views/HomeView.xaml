@@ -485,7 +485,7 @@
                            FontFamily="Segoe UI" FontWeight="DemiBold"/>
                 <TextBlock Grid.Row="1" Grid.Column="1"
                            Margin="7,0,0,0"
-                           Text="10s"
+                           Text="-"
                            FontFamily="Segoe UI" FontWeight="DemiBold"
                            FontSize="17"
                            VerticalAlignment="Center"

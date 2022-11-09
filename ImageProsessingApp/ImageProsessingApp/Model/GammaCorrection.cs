@@ -22,7 +22,7 @@ namespace ImageProsessingApp.Model
         public String BeforeImageSource { get; set; }
         public ImageSource AfterImageSource { get; set; }
 
-        public String ResultsFilename { get; set; } 
+        public String ResultsFilename { get; set; }
 
         public BitmapImage ResultImage { get; set; }
 
@@ -30,6 +30,8 @@ namespace ImageProsessingApp.Model
         public int NumberOfThreads { get; set; }
 
         public ThreadWorker ThreadWorker { get; set; }
+        public double ExecutionTime {get;set;}
+
         private byte[] result;
 
         private double c = 1d;
@@ -78,7 +80,8 @@ namespace ImageProsessingApp.Model
 
             int current = 0;
             int cChannels = 3;
-           
+            //var watch = new System.Diagnostics.Stopwatch();
+            //watch.Start();
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -93,7 +96,8 @@ namespace ImageProsessingApp.Model
                     result[current + 3] = 255;
                 }
             }
-
+            //watch.Stop();
+            //ExecutionTime = (double)watch.ElapsedMilliseconds / 1000;
             Bitmap resImg = new Bitmap(width, height);
 
             BitmapData resData = resImg.LockBits(new Rectangle(0, 0, width, height),
@@ -129,13 +133,16 @@ namespace ImageProsessingApp.Model
 
             int current = 0;
             int cChannels = 3;
-
             List<WaitHandle> waitingRoomList = new List<WaitHandle>();
+            ConcurrentQueue<PixelChange> pixelChangesLocal= new ConcurrentQueue<PixelChange>();
+            var watch = new System.Diagnostics.Stopwatch();
+            watch.Start();
             for (int y = 0; y < height; y++)
             {
+                int pre = y * srcData.Stride;
                 for (int x = 0; x < width; x++)
                 {
-                    current = y * srcData.Stride + x * 4;
+                    current = pre + x * 4;
                     for (int i = 0; i < cChannels; i++)
                     {
                         //parametry do przekazania metodzie ApplyGammaToPixelParam
@@ -145,11 +152,13 @@ namespace ImageProsessingApp.Model
                         //////
                         Action<double,int> action= ApplyGammaToPixelParam;
                         PixelChange pChange = new PixelChange(action,range,coordinates);
+                        pixelChangesLocal.Enqueue(pChange);
 
                         WaitHandle currentWaitHandle = this.ThreadWorker.AddPixelChange(pChange);
+
                         waitingRoomList.Add(currentWaitHandle);
-                        //ApplyGammaToPixel();
-                        if (waitingRoomList.Count == 60)
+
+                        if (waitingRoomList.Count == 56)
                         {
                             foreach (var wh in waitingRoomList)
                             {
@@ -161,7 +170,9 @@ namespace ImageProsessingApp.Model
                     result[current + 3] = 255;                    
                 }
             }
-             
+            watch.Stop();
+            ExecutionTime = (double)watch.ElapsedMilliseconds/1000;
+
             Bitmap resImg = new Bitmap(width, height);
 
             BitmapData resData = resImg.LockBits(new Rectangle(0, 0, width, height),

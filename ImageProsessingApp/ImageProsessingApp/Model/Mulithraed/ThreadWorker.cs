@@ -19,10 +19,14 @@ namespace ImageProsessingApp.Model.Mulithraed
             get { return threadCount; }
             set { threadCount = value; }
         }
-        public int numberOfTasks = 0;
 
         public ThreadWorker(int threadCount)
-        {                        
+        {
+            UpdateThreadCount(threadCount);
+        }
+
+        public ThreadWorker(int threadCount, ConcurrentQueue<PixelChange> _pixelChanges)
+        {
             UpdateThreadCount(threadCount);
         }
 
@@ -49,7 +53,6 @@ namespace ImageProsessingApp.Model.Mulithraed
                         RemoveThread();
                     }
                 }
-
                 ThreadCount = threadCount;
             }
         }
@@ -74,7 +77,6 @@ namespace ImageProsessingApp.Model.Mulithraed
 
                         ((AutoResetEvent)pixelChange.WaitHandle).Set();
                     }
-                    Thread.Sleep(10);
                 }
             }, cancellationTokenSource);
             threads.Enqueue(cThread);
