@@ -118,6 +118,7 @@ namespace ImageProsessingApp.ViewModel
             LoadImageCommand = new RelayCommand(LoadImage);
             RunCommand = new RelayCommand(RunCorraction);
             SaveImageCommand = new RelayCommand(SaveResultImage);
+            TestCommand = new RelayCommand(RunTests);
             NumberOfThreadsChosen = Environment.ProcessorCount;
             NumberOfThreads = 64;
         }
@@ -126,8 +127,8 @@ namespace ImageProsessingApp.ViewModel
 
         public RelayCommand RunCommand { get; }
         public RelayCommand LoadImageCommand { get; }
-        public RelayCommand SaveImageCommand { get; }        
-
+        public RelayCommand SaveImageCommand { get; }
+        public RelayCommand TestCommand { get; }
         private void LoadImage(object o)
         {
             OpenFileDialog open = new OpenFileDialog();
@@ -136,22 +137,56 @@ namespace ImageProsessingApp.ViewModel
 
             if (open.ShowDialog() == true)
                 BeforeImagePath = open.FileName;
-        }
-       
+        }       
         private void RunCorraction(object o)
         {
             if (this.beforeImagePath != null)
             {
                 CanRun = false;
                 GCorecction = new GammaCorrection(this.BeforeImagePath,this.GammaParam,this.NumberOfThreadsChosen);
-                GCorecction.ApplyGammaCorrection();
+                //GCorecction.ApplyGammaCorrection();
+                //GCorecction.ApplyGammaCorrectionInThreads();
+                GCorecction.ApplyGammaCorrectionInThreadsVersion2();
                 this.ExecTime = GCorecction.ExecutionTime.ToString() + " s";
                 this.AfterImagePath = GCorecction.GetCorrectedImageSource();
                 CanSaveResult = true;
                 CanRun=true;
             }
         }
+        private void RunTests(object o)
+        {
+            List<List<string>> list = new List<List<string>>();
+            if (this.beforeImagePath != null)
+            {
+                
+                for (int i = 1; i < 65; i=i*2)
+                {
+                    List<string> listReultsPerThread = new List<string>();
+                    for (int j = 1; j <= 10; j++)
+                    {
+                        GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, i);
+                        GCorecction.ApplyGammaCorrectionInThreadsVersion2();
+                        listReultsPerThread.Add(GCorecction.ExecutionTime.ToString() + " s");
+                    }
+                    list.Add(listReultsPerThread);
+                }
+            }
+            TextWriter tw = new StreamWriter("TestForTestVersion2.txt");
+            int counter = 1;
+            foreach (var block in list)
+            {
+                tw.WriteLine("Number of threads:" + counter.ToString());
+                foreach (var result in block)
+                {
+                    tw.Write(result.ToString());
+                    tw.Write("  ");
+                }
+                tw.WriteLine();
+                counter = counter * 2;
+            }
+            tw.Close();
 
+        }
         private void SaveResultImage(object o)
         {
             SaveFileDialog save = new SaveFileDialog();

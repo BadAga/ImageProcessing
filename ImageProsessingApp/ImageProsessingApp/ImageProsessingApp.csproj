@@ -62,6 +62,9 @@
     <Compile Include="Commands\CommandBase.cs" />
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Model\GammaCorrection.cs" />
+    <Compile Include="Model\Multithreading\MultithreadingManager.cs" />
+    <Compile Include="Model\Multithreading\MultiThreadingManagerVersion2.cs" />
+    <Compile Include="Model\Multithreading\MyThread.cs" />
     <Compile Include="Model\Multithreading\PixelChange.cs" />
     <Compile Include="ViewModel\HomePageViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />

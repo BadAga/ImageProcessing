@@ -10,16 +10,15 @@ namespace ImageProsessingApp.Model.Mulithraeding
     public class PixelChange
     {
         public WaitHandle WaitHandle { get; set; }
-        public Action<double, int> Action { get; set; }
-
-        public double Range { get; }
+        public Action< int> Action { get; set; }
         public int Coordinates { get; }
 
-        public PixelChange(Action<double, int> action, double range, int coordinates)
+        public PixelChange(Action<int> action, int coordinates)
         {
             Action = action;
-            Range = range;
             Coordinates = coordinates;
+            WaitHandle = new AutoResetEvent(false);
         }
+
     }
 }
