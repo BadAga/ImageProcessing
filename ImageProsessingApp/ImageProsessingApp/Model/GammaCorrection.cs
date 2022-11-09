@@ -26,13 +26,14 @@ namespace ImageProsessingApp.Model
 
         public double Gamma { get; set; }
         public int NumberOfThreads { get; set; }
+        public double ExecutionTime { get; set; }
 
         private byte[] result;
 
         private double c = 1d;
 
         private byte b = new byte();
-
+        private byte[] buffer;
         private int coordinates = 0;
 
         public GammaCorrection()
@@ -64,30 +65,34 @@ namespace ImageProsessingApp.Model
                                                  System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             int bytes = srcData.Stride * srcData.Height;
 
-            byte[] buffer = new byte[bytes];
+            this.buffer = new byte[bytes];
+
             result = new byte[bytes];
 
-            Marshal.Copy(srcData.Scan0, buffer, 0, bytes);
+            Marshal.Copy(srcData.Scan0, this.buffer, 0, bytes);
 
             SourceBitmap.UnlockBits(srcData);
 
             int current = 0;
-            int cChannels = 3;
+
+            var watch = new System.Diagnostics.Stopwatch();
+
+            watch.Start();
 
             for (int y = 0; y < height; y++)
             {
+                int prev = y * srcData.Stride;
                 for (int x = 0; x < width; x++)
                 {
-                    current = y * srcData.Stride + x * 4;
-                    for (int i = 0; i < cChannels; i++)
-                    {
-                        this.coordinates = current + i;
-                        this.b = buffer[coordinates];
-                        ApplyGammaToPixel();
-                    }
-                    result[current + 3] = 255;
+                    current = prev + x * 4;
+
+                    this.coordinates = current;
+                    ApplyGammaToPixel();
                 }
             }
+
+            watch.Stop();
+            ExecutionTime=(double)watch.ElapsedMilliseconds/1000;
 
             Bitmap resImg = new Bitmap(width, height);
 
@@ -108,34 +113,44 @@ namespace ImageProsessingApp.Model
 
         private void GammaCorrectionInThreads(double c = 1d)
         {
-            List<Thread> workers = new List<Thread>();
-            for (int i = 0; i < this.NumberOfThreads; i++)
+          
+        }
+        private void ApplyGammaToPixel()
+        {
+            this.b = buffer[coordinates];
+            double range = (double)this.b / 255;
+            double correction = this.c * Math.Pow(range, this.Gamma);
+            this.result[this.coordinates] = (byte)(correction * 255);
+
+            this.coordinates += 1;
+            this.b = buffer[coordinates];
+            range = (double)this.b / 255;
+            correction = this.c * Math.Pow(range, this.Gamma);
+            this.result[this.coordinates] = (byte)(correction * 255);
+
+            this.coordinates += 1;
+            this.b = buffer[coordinates];
+            range = (double)this.b / 255;
+            correction = this.c * Math.Pow(range, this.Gamma);
+            this.result[this.coordinates] = (byte)(correction * 255);
+
+            this.result[this.coordinates + 1] = 255;
+        }
+        private void SetCorrectedAfterImage(Bitmap correctedBitmap)
+        {
+            using (MemoryStream memory = new MemoryStream())
             {
-                Thread t = new Thread(new ThreadStart(ApplyGammaToPixel));
-                workers.Add(t);
+                correctedBitmap.Save(memory, ImageFormat.Png);
+                memory.Position = 0;
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = memory;
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                this.ResultImage = bitmapImage;
+                AfterImageSource = bitmapImage;
             }
         }
-                 private void ApplyGammaToPixel()
-                {
-                    double range = (double)this.b / 255;
-                    double correction = this.c * Math.Pow(range, this.Gamma);
-                    this.result[this.coordinates] = (byte)(correction * 255);
-                }
-                private void SetCorrectedAfterImage(Bitmap correctedBitmap)
-                {
-                    using (MemoryStream memory = new MemoryStream())
-                    {
-                        correctedBitmap.Save(memory, ImageFormat.Png);
-                        memory.Position = 0;
-                        BitmapImage bitmapImage = new BitmapImage();
-                        bitmapImage.BeginInit();
-                        bitmapImage.StreamSource = memory;
-                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmapImage.EndInit();
-                        this.ResultImage = bitmapImage;
-                        AfterImageSource = bitmapImage;
-                    }
-                }
        
     }
 }

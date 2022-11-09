@@ -66,7 +66,7 @@ namespace ImageProsessingApp.ViewModel
                 if (value) //onlu=y one of the ddl's can be chosen.
                 {
                     AsmDDLChosen = false;
-                    IsAnyDDLChosen = true;
+                    CanRun = true;
                 }
                 cDDLChosen = value; 
                 OnPropertyChanged(nameof(CDDLChosen));
@@ -82,18 +82,18 @@ namespace ImageProsessingApp.ViewModel
                 if (value)
                 {
                     CDDLChosen = false;
-                    IsAnyDDLChosen = true;
+                    CanRun = true;
                 }
                 asmDDLChosen = value;
                 OnPropertyChanged(nameof(AsmDDLChosen));
             }
         }
 
-        private bool isAnyDDLChosen = false;
-        public bool IsAnyDDLChosen
+        private bool canRun = false;
+        public bool CanRun
         {
-            get { return isAnyDDLChosen; }
-            set { isAnyDDLChosen = value; OnPropertyChanged(nameof(IsAnyDDLChosen)); }
+            get { return canRun; }
+            set { canRun = value; OnPropertyChanged(nameof(CanRun)); }
         }
 
         private bool canSaveResult = false;
@@ -102,6 +102,14 @@ namespace ImageProsessingApp.ViewModel
             get { return canSaveResult; }
             set { canSaveResult = value; OnPropertyChanged(nameof(CanSaveResult)); }
         }
+
+        private string execTime = "-";
+        public string ExecTime
+        {
+            get { return execTime; }
+            set { execTime = value; OnPropertyChanged(nameof(ExecTime)); }
+        }
+
         public GammaCorrection GCorecction { get; set; }
         /// ///////////////////////////////
         public HomePageViewModel()
@@ -134,10 +142,13 @@ namespace ImageProsessingApp.ViewModel
         {
             if (this.beforeImagePath != null)
             {
+                CanRun = false;
                 GCorecction = new GammaCorrection(this.BeforeImagePath,this.GammaParam,this.NumberOfThreadsChosen);
                 GCorecction.ApplyGammaCorrection();
+                this.ExecTime = GCorecction.ExecutionTime.ToString() + " s";
                 this.AfterImagePath = GCorecction.GetCorrectedImageSource();
                 CanSaveResult = true;
+                CanRun=true;
             }
         }
 
