@@ -17,7 +17,6 @@ namespace ImageProsessingApp.Model.Mulithraeding
         {
             Action = action;
             Coordinates = coordinates;
-            WaitHandle = new AutoResetEvent(false);
         }
 
     }

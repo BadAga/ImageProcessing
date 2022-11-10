@@ -181,56 +181,6 @@ namespace ImageProsessingApp.Model
             resImg.UnlockBits(resData);
             this.SetCorrectedAfterImage(resImg);
         }
-
-        public void ApplyGammaCorrectionInThreadsVersion2(double c = 1d)
-        {
-            int width = SourceBitmap.Width;
-            int height = SourceBitmap.Height;
-            BitmapData srcData = SourceBitmap.LockBits(new Rectangle(0, 0, width, height),
-                                                 ImageLockMode.ReadOnly,
-                                                 System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            int bytes = srcData.Stride * srcData.Height;
-
-            this.buffer = new byte[bytes];
-            result = new byte[bytes];
-
-            Marshal.Copy(srcData.Scan0, this.buffer, 0, bytes);
-            SourceBitmap.UnlockBits(srcData);
-
-            int current = 0;
-            
-            ConcurrentQueue<PixelChange> pixelChangesLocal = new ConcurrentQueue<PixelChange>();
-            
-            for (int y = 0; y < height; y++)
-            {
-                int prev = y * srcData.Stride;
-                for (int x = 0; x < width; x++)
-                {
-                    current = prev + x * 4;
-                    Action<int> action = ApplyGammaToPixelThreads;
-                    PixelChange pChange = new PixelChange(action, current);
-                    pixelChangesLocal.Enqueue(pChange);
-                }
-            }
-            var watch = new System.Diagnostics.Stopwatch();
-            watch.Start();
-
-            MultiThreadingManagerVersion2 manager = new MultiThreadingManagerVersion2(NumberOfThreads, pixelChangesLocal);
-            manager.CompleteTasks();
-
-            watch.Stop();
-            ExecutionTime = (double)watch.ElapsedMilliseconds / 1000;
-            
-            //Bitmap resImg = new Bitmap(width, height);
-
-            //BitmapData resData = resImg.LockBits(new Rectangle(0, 0, width, height),
-            //                                    ImageLockMode.WriteOnly,
-            //                                    System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            //Marshal.Copy(this.result, 0, resData.Scan0, bytes);
-            //resImg.UnlockBits(resData);
-            //this.SetCorrectedAfterImage(resImg);
-        }
         private void ApplyGammaToPixel()
         {
             this.b = buffer[coordinates];

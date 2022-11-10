@@ -144,9 +144,8 @@ namespace ImageProsessingApp.ViewModel
             {
                 CanRun = false;
                 GCorecction = new GammaCorrection(this.BeforeImagePath,this.GammaParam,this.NumberOfThreadsChosen);
-                //GCorecction.ApplyGammaCorrection();
+                GCorecction.ApplyGammaCorrection();
                 //GCorecction.ApplyGammaCorrectionInThreads();
-                GCorecction.ApplyGammaCorrectionInThreadsVersion2();
                 this.ExecTime = GCorecction.ExecutionTime.ToString() + " s";
                 this.AfterImagePath = GCorecction.GetCorrectedImageSource();
                 CanSaveResult = true;
@@ -165,7 +164,7 @@ namespace ImageProsessingApp.ViewModel
                     for (int j = 1; j <= 10; j++)
                     {
                         GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, i);
-                        GCorecction.ApplyGammaCorrectionInThreadsVersion2();
+                        GCorecction.ApplyGammaCorrectionInThreads();
                         listReultsPerThread.Add(GCorecction.ExecutionTime.ToString() + " s");
                     }
                     list.Add(listReultsPerThread);
