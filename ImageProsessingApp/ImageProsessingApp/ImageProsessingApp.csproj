@@ -64,7 +64,7 @@
     <Compile Include="Model\GammaCorrection.cs" />
     <Compile Include="Model\Multithreading\MultithreadingManager.cs" />
     <Compile Include="Model\Multithreading\MyThread.cs" />
-    <Compile Include="Model\Multithreading\PixelChange.cs" />
+    <Compile Include="Model\Multithreading\PixelBlockChange.cs" />
     <Compile Include="ViewModel\HomePageViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />

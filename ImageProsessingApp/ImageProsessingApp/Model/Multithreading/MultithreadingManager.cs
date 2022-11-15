@@ -12,7 +12,7 @@ namespace ImageProsessingApp.Model.Multithreading
     public class MultithreadingManager
     {
         private ConcurrentQueue<MyThread> threads = new ConcurrentQueue<MyThread>();
-        private ConcurrentQueue<PixelChange> pixelChanges = new ConcurrentQueue<PixelChange>();
+        private ConcurrentQueue<PixelBlockChange> pixelChanges = new ConcurrentQueue<PixelBlockChange>();
 
         private int threadCount = 0;
         public int ThreadCount
@@ -41,7 +41,7 @@ namespace ImageProsessingApp.Model.Multithreading
             UpdateThreadCount(threadCount);
         }
 
-        private MultithreadingManager(int threadCount, ConcurrentQueue<PixelChange> _pixelChanges)
+        private MultithreadingManager(int threadCount, ConcurrentQueue<PixelBlockChange> _pixelChanges)
         {
             UpdateThreadCount(threadCount);
         }
@@ -71,7 +71,7 @@ namespace ImageProsessingApp.Model.Multithreading
             }
         }
 
-        public WaitHandle AddPixelChange(PixelChange pixelChange)
+        public WaitHandle AddPixelChange(PixelBlockChange pixelChange)
         {
             pixelChange.WaitHandle = new AutoResetEvent(false);
             this.pixelChanges.Enqueue(pixelChange);
@@ -84,12 +84,12 @@ namespace ImageProsessingApp.Model.Multithreading
             {
                 while (!cancellationTokenSource.IsCancellationRequested)
                 {
-                    PixelChange pixelChange;
-                    if (pixelChanges.TryDequeue(out pixelChange))
+                    PixelBlockChange pixelBlockChange;
+                    if (pixelChanges.TryDequeue(out pixelBlockChange))
                     {
-                        pixelChange.Action(pixelChange.Width,pixelChange.Prev);
+                        pixelBlockChange.Action(pixelBlockChange.Width,pixelBlockChange.Prev);
 
-                        ((AutoResetEvent)pixelChange.WaitHandle).Set();
+                        ((AutoResetEvent)pixelBlockChange.WaitHandle).Set();
                     }
                 }
                 Thread.Sleep(20);

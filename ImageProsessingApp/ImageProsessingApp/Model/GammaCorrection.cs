@@ -129,14 +129,13 @@ namespace ImageProsessingApp.Model
             Marshal.Copy(srcData.Scan0, this.buffer, 0, bytes);
             SourceBitmap.UnlockBits(srcData);
 
-            int current = 0;
             var watch = new System.Diagnostics.Stopwatch();
             int stride = srcData.Stride;
 
             List<WaitHandle> waitingRoomList = new List<WaitHandle>();
             MultithreadingManager manager = MultithreadingManager.Instance;
             manager.UpdateThreadCount(this.NumberOfThreads);
-            ConcurrentQueue<PixelChange> pixelChangesLocal = new ConcurrentQueue<PixelChange>();
+            ConcurrentQueue<PixelBlockChange> pixelChangesLocal = new ConcurrentQueue<PixelBlockChange>();
             watch.Start();
 
             for (int y = 0; y < height; y++)
@@ -144,7 +143,7 @@ namespace ImageProsessingApp.Model
                 int prev = y * stride;
 
                 Action<int,int> action = ApplyGammaToBlockOfPx;
-                PixelChange pChange = new PixelChange(action, width,prev);
+                PixelBlockChange pChange = new PixelBlockChange(action, width,prev);
 
                 WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
                 waitingRoomList.Add(currentWaitHandle);
@@ -167,9 +166,10 @@ namespace ImageProsessingApp.Model
                 }
                 waitingRoomList.Clear();
             }
+
             watch.Stop();
             ExecutionTime = (double)watch.ElapsedMilliseconds / 1000;
-            pixelChangesLocal=new ConcurrentQueue<PixelChange>();
+            pixelChangesLocal=new ConcurrentQueue<PixelBlockChange>();
             Bitmap resImg = new Bitmap(width, height);
 
             BitmapData resData = resImg.LockBits(new Rectangle(0, 0, width, height),

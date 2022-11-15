@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ImageProsessingApp.Model.Mulithraeding
 {
-    public class PixelChange
+    public class PixelBlockChange
     {
         public WaitHandle WaitHandle { get; set; }
         public Action< int,int> Action { get; set; }
@@ -15,7 +15,7 @@ namespace ImageProsessingApp.Model.Mulithraeding
 
         public int Prev { get; }
         public int Width { get; }
-        public PixelChange(Action<int,int> action, int width, int prev)
+        public PixelBlockChange(Action<int,int> action, int width, int prev)
         {
             Action = action;
             Width = width;
