@@ -158,7 +158,7 @@ namespace ImageProsessingApp.ViewModel
             if (this.beforeImagePath != null)
             {
                 
-                for (int i = 1; i < 65; i=i*2)
+                for (int i = 1; i < 33; i=i*2)
                 {
                     List<string> listReultsPerThread = new List<string>();
                     for (int j = 1; j <= 10; j++)
@@ -170,7 +170,7 @@ namespace ImageProsessingApp.ViewModel
                     list.Add(listReultsPerThread);
                 }
             }
-            TextWriter tw = new StreamWriter("TestForTestRelease.txt");
+            TextWriter tw = new StreamWriter("TestForTestReleaseSmol.txt");
             int counter = 1;
             foreach (var block in list)
             {

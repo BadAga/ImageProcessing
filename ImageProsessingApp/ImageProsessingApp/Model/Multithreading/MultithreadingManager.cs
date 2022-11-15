@@ -92,7 +92,7 @@ namespace ImageProsessingApp.Model.Multithreading
                         ((AutoResetEvent)pixelBlockChange.WaitHandle).Set();
                     }
                 }
-                Thread.Sleep(20);
+                Thread.Sleep(1);
             }, cancellationTokenSource);
             threads.Enqueue(cThread);
             cThread.Thread.Start();
