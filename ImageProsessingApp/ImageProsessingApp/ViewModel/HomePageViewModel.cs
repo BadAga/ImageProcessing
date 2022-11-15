@@ -144,8 +144,8 @@ namespace ImageProsessingApp.ViewModel
             {
                 CanRun = false;
                 GCorecction = new GammaCorrection(this.BeforeImagePath,this.GammaParam,this.NumberOfThreadsChosen);
-                GCorecction.ApplyGammaCorrection();
-                //GCorecction.ApplyGammaCorrectionInThreads();
+                //GCorecction.ApplyGammaCorrection();
+                GCorecction.ApplyGammaCorrectionInThreads();
                 this.ExecTime = GCorecction.ExecutionTime.ToString() + " s";
                 this.AfterImagePath = GCorecction.GetCorrectedImageSource();
                 CanSaveResult = true;
@@ -170,7 +170,7 @@ namespace ImageProsessingApp.ViewModel
                     list.Add(listReultsPerThread);
                 }
             }
-            TextWriter tw = new StreamWriter("TestForTestVersion2.txt");
+            TextWriter tw = new StreamWriter("TestForTestRelease.txt");
             int counter = 1;
             foreach (var block in list)
             {

@@ -87,7 +87,7 @@ namespace ImageProsessingApp.Model.Multithreading
                     PixelChange pixelChange;
                     if (pixelChanges.TryDequeue(out pixelChange))
                     {
-                        pixelChange.Action(pixelChange.Coordinates);
+                        pixelChange.Action(pixelChange.Width,pixelChange.Prev);
 
                         ((AutoResetEvent)pixelChange.WaitHandle).Set();
                     }

@@ -131,35 +131,34 @@ namespace ImageProsessingApp.Model
 
             int current = 0;
             var watch = new System.Diagnostics.Stopwatch();
+            int stride = srcData.Stride;
 
-            
             List<WaitHandle> waitingRoomList = new List<WaitHandle>();
             MultithreadingManager manager = MultithreadingManager.Instance;
             manager.UpdateThreadCount(this.NumberOfThreads);
             ConcurrentQueue<PixelChange> pixelChangesLocal = new ConcurrentQueue<PixelChange>();
             watch.Start();
+
             for (int y = 0; y < height; y++)
             {
-                int prev = y * srcData.Stride;
-                for (int x = 0; x < width; x++)
-                {
-                    current = prev + x * 4;
-                    Action<int> action = ApplyGammaToPixelThreads;
-                    PixelChange pChange = new PixelChange(action, current);
+                int prev = y * stride;
 
-                    WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
-                    waitingRoomList.Add(currentWaitHandle);
-                    pixelChangesLocal.Enqueue(pChange);
-                    if (waitingRoomList.Count == 56)
+                Action<int,int> action = ApplyGammaToBlockOfPx;
+                PixelChange pChange = new PixelChange(action, width,prev);
+
+                WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
+                waitingRoomList.Add(currentWaitHandle);
+                pixelChangesLocal.Enqueue(pChange);
+                if (waitingRoomList.Count == 56)
+                {
+                    foreach (var wh in waitingRoomList)
                     {
-                        foreach (var wh in waitingRoomList)
-                        {
-                            wh.WaitOne();
-                        }
-                        waitingRoomList.Clear();
+                        wh.WaitOne();
                     }
+                    waitingRoomList.Clear();
                 }
             }
+
             if (waitingRoomList.Count != 0)
             {
                 foreach (var wh in waitingRoomList)
@@ -201,6 +200,16 @@ namespace ImageProsessingApp.Model
             this.result[this.coordinates] = (byte)(correction * 255);
 
             this.result[this.coordinates + 1] = 255;
+        }
+
+        private void ApplyGammaToBlockOfPx(int width, int prev)
+        {
+            int current = 0;
+            for (int x = 0; x < width; x++)
+            {
+                current = prev + x * 4;
+                ApplyGammaToPixelThreads(current);    
+            }
         }
         private void ApplyGammaToPixelThreads(int coordinates)
         {
