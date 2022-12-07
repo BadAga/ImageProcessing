@@ -87,8 +87,8 @@ namespace ImageProsessingApp.Model.Multithreading
                     PixelBlockChange pixelBlockChange;
                     if (pixelChanges.TryDequeue(out pixelBlockChange))
                     {
-                        pixelBlockChange.Action(pixelBlockChange.Width,pixelBlockChange.Prev);
-
+                        //pixelBlockChange.Action(pixelBlockChange.Width,pixelBlockChange.Prev);
+                        pixelBlockChange.Action();
                         ((AutoResetEvent)pixelBlockChange.WaitHandle).Set();
                     }
                 }

@@ -14,6 +14,8 @@ using System.Security.AccessControl;
 using ImageProsessingApp.Model.Mulithraeding;
 using ImageProsessingApp.Model.Multithreading;
 using System.Collections.Concurrent;
+using System.Windows;
+using IPCDll;
 
 namespace ImageProsessingApp.Model
 {
@@ -52,63 +54,12 @@ namespace ImageProsessingApp.Model
             this.SourceBitmap = (Bitmap)Image.FromFile(beforeImageSource);
             this.ResultsFilename = String.Empty;
             this.Gamma = gammaParam;
-            this.NumberOfThreads = numberOfThreads;
+            this.NumberOfThreads = numberOfThreads;           
         }
         public void SetBitmap()
         {
             this.SourceBitmap = (Bitmap)Image.FromFile(this.BeforeImageSource);
         }
-
-        public void ApplyGammaCorrection()
-        {
-            int width = SourceBitmap.Width;
-            int height = SourceBitmap.Height;
-            BitmapData srcData = SourceBitmap.LockBits(new Rectangle(0, 0, width, height),
-                                                 ImageLockMode.ReadOnly,
-                                                 System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            int bytes = srcData.Stride * srcData.Height;
-
-            this.buffer = new byte[bytes];
-
-            result = new byte[bytes];
-
-            Marshal.Copy(srcData.Scan0, this.buffer, 0, bytes);
-
-            SourceBitmap.UnlockBits(srcData);
-
-            int current = 0;
-
-            var watch = new System.Diagnostics.Stopwatch();
-
-            watch.Start();
-
-            for (int y = 0; y < height; y++)
-            {
-                int prev = y * srcData.Stride;
-                for (int x = 0; x < width; x++)
-                {
-                    current = prev + x * 4;
-
-                    this.coordinates = current;
-                    ApplyGammaToPixel();
-                }
-            }
-
-            watch.Stop();
-            ExecutionTime=(double)watch.ElapsedMilliseconds/1000;
-
-            Bitmap resImg = new Bitmap(width, height);
-
-            BitmapData resData = resImg.LockBits(new Rectangle(0, 0, width, height),
-                                                ImageLockMode.WriteOnly,
-                                                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            Marshal.Copy(result, 0, resData.Scan0, bytes);
-            resImg.UnlockBits(resData);
-            this.SetCorrectedAfterImage(resImg);
-
-        }
-
         public ImageSource GetCorrectedImageSource()
         {
             return this.AfterImageSource;
@@ -124,7 +75,7 @@ namespace ImageProsessingApp.Model
             int bytes = srcData.Stride * srcData.Height;
 
             this.buffer = new byte[bytes];
-            result = new byte[bytes];
+            this.result = new byte[bytes];
 
             Marshal.Copy(srcData.Scan0, this.buffer, 0, bytes);
             SourceBitmap.UnlockBits(srcData);
@@ -135,19 +86,19 @@ namespace ImageProsessingApp.Model
             List<WaitHandle> waitingRoomList = new List<WaitHandle>();
             MultithreadingManager manager = MultithreadingManager.Instance;
             manager.UpdateThreadCount(this.NumberOfThreads);
-            ConcurrentQueue<PixelBlockChange> pixelChangesLocal = new ConcurrentQueue<PixelBlockChange>();
             watch.Start();
 
             for (int y = 0; y < height; y++)
             {
                 int prev = y * stride;
 
-                Action<int,int> action = ApplyGammaToBlockOfPx;
-                PixelBlockChange pChange = new PixelBlockChange(action, width,prev);
+                GammaCorrectonC gmccBlock = new GammaCorrectonC(width, prev, ref this.result, ref this.buffer, this.Gamma);
+                Action action =()=> gmccBlock.BlockCorrection();
+                // PixelBlockChange pChange = new PixelBlockChange(action, width,prev);
+                PixelBlockChange pChange = new PixelBlockChange(action);
 
                 WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
                 waitingRoomList.Add(currentWaitHandle);
-                pixelChangesLocal.Enqueue(pChange);
                 if (waitingRoomList.Count == 56)
                 {
                     foreach (var wh in waitingRoomList)
@@ -169,7 +120,6 @@ namespace ImageProsessingApp.Model
 
             watch.Stop();
             ExecutionTime = (double)watch.ElapsedMilliseconds / 1000;
-            pixelChangesLocal=new ConcurrentQueue<PixelBlockChange>();
             Bitmap resImg = new Bitmap(width, height);
 
             BitmapData resData = resImg.LockBits(new Rectangle(0, 0, width, height),
@@ -180,27 +130,6 @@ namespace ImageProsessingApp.Model
             resImg.UnlockBits(resData);
             this.SetCorrectedAfterImage(resImg);
         }
-        private void ApplyGammaToPixel()
-        {
-            this.b = buffer[coordinates];
-            double range = (double)this.b / 255;
-            double correction = this.c * Math.Pow(range, this.Gamma);
-            this.result[this.coordinates] = (byte)(correction * 255);
-
-            this.coordinates += 1;
-            this.b = buffer[coordinates];
-            range = (double)this.b / 255;
-            correction = this.c * Math.Pow(range, this.Gamma);
-            this.result[this.coordinates] = (byte)(correction * 255);
-
-            this.coordinates += 1;
-            this.b = buffer[coordinates];
-            range = (double)this.b / 255;
-            correction = this.c * Math.Pow(range, this.Gamma);
-            this.result[this.coordinates] = (byte)(correction * 255);
-
-            this.result[this.coordinates + 1] = 255;
-        }
 
         private void ApplyGammaToBlockOfPx(int width, int prev)
         {
@@ -208,15 +137,22 @@ namespace ImageProsessingApp.Model
             for (int x = 0; x < width; x++)
             {
                 current = prev + x * 4;
-                ApplyGammaToPixelThreads(current);    
+                ApplyGammaToPixelThreads(current);                    
             }
         }
         private void ApplyGammaToPixelThreads(int coordinates)
-        {
+        { 
             byte b = buffer[coordinates];
             double range = (double)b / 255;
             double correction = this.c * Math.Pow(range, this.Gamma);
+
             this.result[coordinates] = (byte)(correction * 255);
+
+            coordinates += 1;
+            b = buffer[coordinates];
+            range = (double)b / 255;
+            correction = this.c * Math.Pow(range, this.Gamma);
+           this.result[coordinates] = (byte)(correction * 255);
 
             coordinates += 1;
             b = buffer[coordinates];
@@ -225,12 +161,8 @@ namespace ImageProsessingApp.Model
             this.result[coordinates] = (byte)(correction * 255);
 
             coordinates += 1;
-            b = buffer[coordinates];
-            range = (double)b / 255;
-            correction = this.c * Math.Pow(range, this.Gamma);
-            result[coordinates] = (byte)(correction * 255);
-
-            this.result[coordinates + 1] = 255;
+            this.result[coordinates] = 255;
+            //return changed;
         }
         private void SetCorrectedAfterImage(Bitmap correctedBitmap)
         {

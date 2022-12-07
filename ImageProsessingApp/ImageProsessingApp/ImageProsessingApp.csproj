@@ -145,6 +145,11 @@
   <ItemGroup>
     <Resource Include="Images\shapes1.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\IPCDll\IPCDll.csproj">
+      <Project>{cd278077-54c6-43ba-862a-e5c54211ea0a}</Project>
+      <Name>IPCDll</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

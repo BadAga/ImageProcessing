@@ -17,3 +17,6 @@ C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\Imag
 C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\ImageProsessingApp\obj\x64\Debug\ImageProsessingApp.csproj.CoreCompileInputs.cache
 C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\ImageProsessingApp\obj\x64\Debug\ImageProsessingApp.exe
 C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\ImageProsessingApp\obj\x64\Debug\ImageProsessingApp.pdb
+C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\ImageProsessingApp\bin\x64\Debug\IPCDll.dll
+C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\ImageProsessingApp\bin\x64\Debug\IPCDll.pdb
+C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\ImageProsessingApp\obj\x64\Debug\ImageProsessingApp.csproj.CopyComplete

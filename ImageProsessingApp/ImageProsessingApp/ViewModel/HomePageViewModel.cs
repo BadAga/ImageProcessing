@@ -65,7 +65,7 @@ namespace ImageProsessingApp.ViewModel
             {
                 if (value) //onlu=y one of the ddl's can be chosen.
                 {
-                    AsmDDLChosen = false;
+                    AsmDLLChosen = false;
                     CanRun = true;
                 }
                 cDDLChosen = value; 
@@ -73,10 +73,10 @@ namespace ImageProsessingApp.ViewModel
             }
         }
 
-        private bool asmDDLChosen=false;//as default
-        public bool AsmDDLChosen
+        private bool asmDLLChosen=false;//as default
+        public bool AsmDLLChosen
         {
-            get { return asmDDLChosen; }
+            get { return asmDLLChosen; }
             set
             {
                 if (value)
@@ -84,8 +84,8 @@ namespace ImageProsessingApp.ViewModel
                     CDDLChosen = false;
                     CanRun = true;
                 }
-                asmDDLChosen = value;
-                OnPropertyChanged(nameof(AsmDDLChosen));
+                asmDLLChosen = value;
+                OnPropertyChanged(nameof(AsmDLLChosen));
             }
         }
 
@@ -170,7 +170,10 @@ namespace ImageProsessingApp.ViewModel
                     list.Add(listReultsPerThread);
                 }
             }
-            TextWriter tw = new StreamWriter("TestForTestReleaseSmol.txt");
+            String date = DateTime.Now.Date.Day.ToString();
+            date+=DateTime.Now.Date.Month.ToString();
+            String filename = "Test"+date+"2.txt";
+            TextWriter tw = new StreamWriter(filename);
             int counter = 1;
             foreach (var block in list)
             {
