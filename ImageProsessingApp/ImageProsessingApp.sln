@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProsessingApp", "ImageProsessingApp\ImageProsessingApp.csproj", "{84DEC177-9DBF-421E-85B2-3C27BF5706FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageProcessingApp", "ImageProsessingApp\ImageProcessingApp.csproj", "{84DEC177-9DBF-421E-85B2-3C27BF5706FB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IPCDll", "IPCDll\IPCDll.csproj", "{CD278077-54C6-43BA-862A-E5C54211EA0A}"
 EndProject

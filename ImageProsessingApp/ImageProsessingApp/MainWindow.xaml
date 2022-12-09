@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImageProsessingApp" xmlns:views="clr-namespace:ImageProsessingApp.Views"
         mc:Ignorable="d"
-        Title="ImageThinningApp" Height="600" Width="900">
+        Title="GammaCorrectionApp" Height="600" Width="900">
     <Grid>
         <views:HomeView DataContext="{Binding CurrentViewModel}"/>
     </Grid>
