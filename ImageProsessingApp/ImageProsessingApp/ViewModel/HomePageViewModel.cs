@@ -110,6 +110,13 @@ namespace ImageProsessingApp.ViewModel
             set { execTime = value; OnPropertyChanged(nameof(ExecTime)); }
         }
 
+        private string filenameForTest;
+        public string FilenameForTest
+        {
+            get { return filenameForTest; }
+            set { filenameForTest = value; OnPropertyChanged(nameof(FilenameForTest)); }
+        }
+
         public GammaCorrection GCorecction { get; set; }
         /// ///////////////////////////////
         public HomePageViewModel()
@@ -122,6 +129,7 @@ namespace ImageProsessingApp.ViewModel
             NumberOfThreadsChosen = Environment.ProcessorCount;
             NumberOfThreads = 64;
         }
+        
 
         //commands
 
@@ -137,6 +145,7 @@ namespace ImageProsessingApp.ViewModel
 
             if (open.ShowDialog() == true)
                 BeforeImagePath = open.FileName;
+                FilenameForTest = System.IO.Path.GetFileNameWithoutExtension(open.FileName);
         }       
         private void RunCorraction(object o)
         {
@@ -156,9 +165,8 @@ namespace ImageProsessingApp.ViewModel
         {
             List<List<string>> list = new List<List<string>>();
             if (this.beforeImagePath != null)
-            {
-                
-                for (int i = 1; i < 33; i=i*2)
+            {                
+                for (int i = 1; i < 65; i=i*2)
                 {
                     List<string> listReultsPerThread = new List<string>();
                     for (int j = 1; j <= 10; j++)
@@ -171,8 +179,8 @@ namespace ImageProsessingApp.ViewModel
                 }
             }
             String date = DateTime.Now.Date.Day.ToString();
-            date+=DateTime.Now.Date.Month.ToString();
-            String filename = "Test"+date+"2.txt";
+            date+="_"+DateTime.Now.Date.Month.ToString();
+            String filename = "Test_"+date+"_"+FilenameForTest+".txt";
             TextWriter tw = new StreamWriter(filename);
             int counter = 1;
             foreach (var block in list)
