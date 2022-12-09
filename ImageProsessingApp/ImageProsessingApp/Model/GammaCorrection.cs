@@ -1,23 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Drawing;
-using System.Threading.Tasks;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Threading;
-using System.Security.AccessControl;
-using ImageProsessingApp.Model.Mulithraed;
-using System.Collections.Concurrent;
-using ImageProsessingApp.Model.Mulithraeding;
 using ImageProsessingApp.Model.Multithreading;
-using System.Collections.Concurrent;
-using System.Windows;
 using IPCDll;
+using ImageProsessingApp.Model.Mulithraeding;
 
 namespace ImageProsessingApp.Model
 {
@@ -34,9 +26,6 @@ namespace ImageProsessingApp.Model
         public double Gamma { get; set; }
         public int NumberOfThreads { get; set; }
         public double ExecutionTime { get; set; }
-
-        public ThreadWorker ThreadWorker { get; set; }
-        public double ExecutionTime {get;set;}
 
         private byte[] result;
 
@@ -144,18 +133,6 @@ namespace ImageProsessingApp.Model
                 current = prev + x * 4;
                 ApplyGammaToPixelThreads(current);                    
             }
-            watch.Stop();
-            ExecutionTime = (double)watch.ElapsedMilliseconds/1000;
-
-            Bitmap resImg = new Bitmap(width, height);
-
-            BitmapData resData = resImg.LockBits(new Rectangle(0, 0, width, height),
-                                                ImageLockMode.WriteOnly,
-                                                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-            Marshal.Copy(this.result, 0, resData.Scan0, bytes);
-            resImg.UnlockBits(resData);
-            this.SetCorrectedAfterImage(resImg);
         }
         private void ApplyGammaToPixelThreads(int coordinates)
         { 
