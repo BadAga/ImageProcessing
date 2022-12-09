@@ -57,14 +57,6 @@ namespace ImageProsessingApp.ViewModel
             set { afterImagePath = value; OnPropertyChanged(nameof(AfterImagePath)); }
         }
 
-
-        private String execTime="0 s";
-        public String ExecTime
-        {
-            get { return execTime;}
-            set { execTime = value; OnPropertyChanged(nameof(ExecTime)); }
-        }
-
         private bool cDDLChosen=false;//as default     
         public bool CDDLChosen
         {
@@ -73,7 +65,7 @@ namespace ImageProsessingApp.ViewModel
             {
                 if (value) //onlu=y one of the ddl's can be chosen.
                 {
-                    AsmDDLChosen = false;
+                    AsmDLLChosen = false;
                     CanRun = true;
                 }
                 cDDLChosen = value; 
@@ -81,10 +73,10 @@ namespace ImageProsessingApp.ViewModel
             }
         }
 
-        private bool asmDDLChosen=false;//as default
-        public bool AsmDDLChosen
+        private bool asmDLLChosen=false;//as default
+        public bool AsmDLLChosen
         {
-            get { return asmDDLChosen; }
+            get { return asmDLLChosen; }
             set
             {
                 if (value)
@@ -92,8 +84,8 @@ namespace ImageProsessingApp.ViewModel
                     CDDLChosen = false;
                     CanRun = true;
                 }
-                asmDDLChosen = value;
-                OnPropertyChanged(nameof(AsmDDLChosen));
+                asmDLLChosen = value;
+                OnPropertyChanged(nameof(AsmDLLChosen));
             }
         }
 
@@ -110,6 +102,21 @@ namespace ImageProsessingApp.ViewModel
             get { return canSaveResult; }
             set { canSaveResult = value; OnPropertyChanged(nameof(CanSaveResult)); }
         }
+
+        private string execTime = "-";
+        public string ExecTime
+        {
+            get { return execTime; }
+            set { execTime = value; OnPropertyChanged(nameof(ExecTime)); }
+        }
+
+        private string filenameForTest;
+        public string FilenameForTest
+        {
+            get { return filenameForTest; }
+            set { filenameForTest = value; OnPropertyChanged(nameof(FilenameForTest)); }
+        }
+
         public GammaCorrection GCorecction { get; set; }
         /// ///////////////////////////////
         public HomePageViewModel()
@@ -118,16 +125,18 @@ namespace ImageProsessingApp.ViewModel
             LoadImageCommand = new RelayCommand(LoadImage);
             RunCommand = new RelayCommand(RunCorraction);
             SaveImageCommand = new RelayCommand(SaveResultImage);
+            TestCommand = new RelayCommand(RunTests);
             NumberOfThreadsChosen = Environment.ProcessorCount;
             NumberOfThreads = 64;
         }
+        
 
         //commands
 
         public RelayCommand RunCommand { get; }
         public RelayCommand LoadImageCommand { get; }
-        public RelayCommand SaveImageCommand { get; }        
-
+        public RelayCommand SaveImageCommand { get; }
+        public RelayCommand TestCommand { get; }
         private void LoadImage(object o)
         {
             OpenFileDialog open = new OpenFileDialog();
@@ -136,23 +145,58 @@ namespace ImageProsessingApp.ViewModel
 
             if (open.ShowDialog() == true)
                 BeforeImagePath = open.FileName;
-        }
-       
+                FilenameForTest = System.IO.Path.GetFileNameWithoutExtension(open.FileName);
+        }       
         private void RunCorraction(object o)
         {
             if (this.beforeImagePath != null)
             {
-                CDDLChosen=false;
+                CanRun = false;
                 GCorecction = new GammaCorrection(this.BeforeImagePath,this.GammaParam,this.NumberOfThreadsChosen);
-                //GCorecction.GammaCorrectionInThreads();
-                GCorecction.ApplyGammaCorrection();
+                //GCorecction.ApplyGammaCorrection();
+                GCorecction.ApplyGammaCorrectionInThreads();
                 this.ExecTime = GCorecction.ExecutionTime.ToString() + " s";
                 this.AfterImagePath = GCorecction.GetCorrectedImageSource();
                 CanSaveResult = true;
-                CDDLChosen = true;
+                CanRun=true;
             }
         }
+        private void RunTests(object o)
+        {
+            List<List<string>> list = new List<List<string>>();
+            if (this.beforeImagePath != null)
+            {                
+                for (int i = 1; i < 65; i=i*2)
+                {
+                    List<string> listReultsPerThread = new List<string>();
+                    for (int j = 1; j <= 10; j++)
+                    {
+                        GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, i);
+                        GCorecction.ApplyGammaCorrectionInThreads();
+                        listReultsPerThread.Add(GCorecction.ExecutionTime.ToString() + " s");
+                    }
+                    list.Add(listReultsPerThread);
+                }
+            }
+            String date = DateTime.Now.Date.Day.ToString();
+            date+="_"+DateTime.Now.Date.Month.ToString();
+            String filename = "Test_"+date+"_"+FilenameForTest+".txt";
+            TextWriter tw = new StreamWriter(filename);
+            int counter = 1;
+            foreach (var block in list)
+            {
+                tw.WriteLine("Number of threads:" + counter.ToString());
+                foreach (var result in block)
+                {
+                    tw.Write(result.ToString());
+                    tw.Write("  ");
+                }
+                tw.WriteLine();
+                counter = counter * 2;
+            }
+            tw.Close();
 
+        }
         private void SaveResultImage(object o)
         {
             SaveFileDialog save = new SaveFileDialog();
