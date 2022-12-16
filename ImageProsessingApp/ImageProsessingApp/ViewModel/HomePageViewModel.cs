@@ -57,19 +57,19 @@ namespace ImageProsessingApp.ViewModel
             set { afterImagePath = value; OnPropertyChanged(nameof(AfterImagePath)); }
         }
 
-        private bool cDDLChosen=false;//as default     
-        public bool CDDLChosen
+        private bool cDLLChosen=false;//as default     
+        public bool CDLLChosen
         {
-            get { return cDDLChosen; }
+            get { return cDLLChosen; }
             set
             {
-                if (value) //onlu=y one of the ddl's can be chosen.
+                if (value) //only one of the ddl's can be chosen.
                 {
                     AsmDLLChosen = false;
                     CanRun = true;
                 }
-                cDDLChosen = value; 
-                OnPropertyChanged(nameof(CDDLChosen));
+                cDLLChosen = value; 
+                OnPropertyChanged(nameof(CDLLChosen));
             }
         }
 
@@ -81,7 +81,7 @@ namespace ImageProsessingApp.ViewModel
             {
                 if (value)
                 {
-                    CDDLChosen = false;
+                    CDLLChosen = false;
                     CanRun = true;
                 }
                 asmDLLChosen = value;
@@ -118,7 +118,6 @@ namespace ImageProsessingApp.ViewModel
         }
 
         public GammaCorrection GCorecction { get; set; }
-        /// ///////////////////////////////
         public HomePageViewModel()
         {
             GCorecction = new GammaCorrection();
@@ -137,83 +136,91 @@ namespace ImageProsessingApp.ViewModel
         public RelayCommand LoadImageCommand { get; }
         public RelayCommand SaveImageCommand { get; }
         public RelayCommand TestCommand { get; }
-        private void LoadImage(object o)
-        {
-            OpenFileDialog open = new OpenFileDialog();
-            open.DefaultExt = (".png");
-            open.Filter = "Pictures (*.jpg;*.gif;*.png)|*.jpg;*.gif;*.png";
 
-            if (open.ShowDialog() == true)
-                BeforeImagePath = open.FileName;
-                FilenameForTest = System.IO.Path.GetFileNameWithoutExtension(open.FileName);
-        }       
-        private void RunCorraction(object o)
-        {
-            if (this.beforeImagePath != null)
+            private void LoadImage(object o)
             {
-                CanRun = false;
-                GCorecction = new GammaCorrection(this.BeforeImagePath,this.GammaParam,this.NumberOfThreadsChosen);
-                //GCorecction.ApplyGammaCorrection();
-                GCorecction.ApplyGammaCorrectionInThreads();
-                this.ExecTime = GCorecction.ExecutionTime.ToString() + " s";
-                this.AfterImagePath = GCorecction.GetCorrectedImageSource();
-                CanSaveResult = true;
-                CanRun=true;
-            }
-        }
-        private void RunTests(object o)
-        {
-            List<List<string>> list = new List<List<string>>();
-            if (this.beforeImagePath != null)
-            {                
-                for (int i = 1; i < 65; i=i*2)
+                OpenFileDialog open = new OpenFileDialog();
+                open.DefaultExt = (".png");
+                open.Filter = "Pictures (*.jpg;*.gif;*.png)|*.jpg;*.gif;*.png";
+
+                if (open.ShowDialog() == true)
+                    BeforeImagePath = open.FileName;
+                    FilenameForTest = System.IO.Path.GetFileNameWithoutExtension(open.FileName);
+            }       
+            private void RunCorraction(object o)
+            {
+                if (this.beforeImagePath != null)
                 {
-                    List<string> listReultsPerThread = new List<string>();
-                    for (int j = 1; j <= 10; j++)
+                    CanRun = false;
+                    if (this.CDLLChosen)
                     {
-                        GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, i);
-                        GCorecction.ApplyGammaCorrectionInThreads();
-                        listReultsPerThread.Add(GCorecction.ExecutionTime.ToString() + " s");
+                        GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, this.NumberOfThreadsChosen);
+                        GCorecction.ApplyGammaCorrectionInThreadsC();
+                        this.ExecTime = GCorecction.ExecutionTime.ToString() + " s";
+                        this.AfterImagePath = GCorecction.GetCorrectedImageSource();
+                        CanSaveResult = true;
                     }
-                    list.Add(listReultsPerThread);
-                }
-            }
-            String date = DateTime.Now.Date.Day.ToString();
-            date+="_"+DateTime.Now.Date.Month.ToString();
-            String filename = "Test_"+date+"_"+FilenameForTest+".txt";
-            TextWriter tw = new StreamWriter(filename);
-            int counter = 1;
-            foreach (var block in list)
-            {
-                tw.WriteLine("Number of threads:" + counter.ToString());
-                foreach (var result in block)
-                {
-                    tw.Write(result.ToString());
-                    tw.Write("  ");
-                }
-                tw.WriteLine();
-                counter = counter * 2;
-            }
-            tw.Close();
-
-        }
-        private void SaveResultImage(object o)
-        {
-            SaveFileDialog save = new SaveFileDialog();
-            save.Title = "Save picture as ";
-            save.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp)|*.jpg; *.jpeg; *.gif; *.bmp";
-            if (GCorecction.ResultImage != null)
-            {
-                if (save.ShowDialog() == true)
-                {
-                    JpegBitmapEncoder jpg = new JpegBitmapEncoder();
-                    jpg.Frames.Add(BitmapFrame.Create(GCorecction.ResultImage));
-                    using (Stream stm = File.Create(save.FileName))
+                    else if(this.AsmDLLChosen)
                     {
-                        jpg.Save(stm);
+                        GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, this.NumberOfThreadsChosen);
+                        GCorecction.ApplyGammaCorrectionInThreadsAsm();
+                    }
+                    CanRun=true;
+                }
+            }
+            private void RunTests(object o)
+            {
+                List<List<string>> list = new List<List<string>>();
+                if (this.beforeImagePath != null)
+                {                
+                    for (int i = 1; i < 65; i=i*2)
+                    {
+                        List<string> listReultsPerThread = new List<string>();
+                        for (int j = 1; j <= 10; j++)
+                        {
+                            GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, i);
+                            GCorecction.ApplyGammaCorrectionInThreadsC();
+                            listReultsPerThread.Add(GCorecction.ExecutionTime.ToString() + " s");
+                        }
+                        list.Add(listReultsPerThread);
                     }
                 }
+                String date = DateTime.Now.Date.Day.ToString();
+                date+="_"+DateTime.Now.Date.Month.ToString();
+                String filename = "Test_"+date+"_"+FilenameForTest+".txt";
+                TextWriter tw = new StreamWriter(filename);
+                int counter = 1;
+                foreach (var block in list)
+                {
+                    tw.WriteLine("Number of threads:" + counter.ToString());
+                    foreach (var result in block)
+                    {
+                        tw.Write(result.ToString());
+                        tw.Write("  ");
+                    }
+                    tw.WriteLine();
+                    counter = counter * 2;
+                }
+                tw.Close();
+
             }
-        }
+            private void SaveResultImage(object o)
+            {
+                SaveFileDialog save = new SaveFileDialog();
+                save.Title = "Save picture as ";
+                save.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp)|*.jpg; *.jpeg; *.gif; *.bmp";
+                if (GCorecction.ResultImage != null)
+                {
+                    if (save.ShowDialog() == true)
+                    {
+                        JpegBitmapEncoder jpg = new JpegBitmapEncoder();
+                        jpg.Frames.Add(BitmapFrame.Create(GCorecction.ResultImage));
+                        using (Stream stm = File.Create(save.FileName))
+                        {
+                            jpg.Save(stm);
+                        }
+                    }
+                }
+            }
     }
 }

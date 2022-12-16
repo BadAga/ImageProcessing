@@ -10,11 +10,12 @@ using System.Threading;
 using ImageProsessingApp.Model.Multithreading;
 using IPCDll;
 using ImageProsessingApp.Model.Mulithraeding;
+using System.Windows;
 
 namespace ImageProsessingApp.Model
 {
     public class GammaCorrection
-    {
+    {        
         public Bitmap SourceBitmap { get; set; }
         public String BeforeImageSource { get; set; }
         public ImageSource AfterImageSource { get; set; }
@@ -59,7 +60,8 @@ namespace ImageProsessingApp.Model
             return this.AfterImageSource;
         }
 
-        public void ApplyGammaCorrectionInThreads(double c = 1d)
+        //main algorithm
+        public void ApplyGammaCorrectionInThreadsC(double c = 1d)
         {
             int width = SourceBitmap.Width;
             int height = SourceBitmap.Height;
@@ -88,7 +90,6 @@ namespace ImageProsessingApp.Model
 
                 GammaCorrectonC gmccBlock = new GammaCorrectonC(width, prev, ref this.result, ref this.buffer, this.Gamma);
                 Action action =()=> gmccBlock.BlockCorrection();
-                // PixelBlockChange pChange = new PixelBlockChange(action, width,prev);
                 PixelBlockChange pChange = new PixelBlockChange(action);
 
                 WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
@@ -124,40 +125,7 @@ namespace ImageProsessingApp.Model
             resImg.UnlockBits(resData);
             this.SetCorrectedAfterImage(resImg);
         }
-
-        private void ApplyGammaToBlockOfPx(int width, int prev)
-        {
-            int current = 0;
-            for (int x = 0; x < width; x++)
-            {
-                current = prev + x * 4;
-                ApplyGammaToPixelThreads(current);                    
-            }
-        }
-        private void ApplyGammaToPixelThreads(int coordinates)
-        { 
-            byte b = buffer[coordinates];
-            double range = (double)b / 255;
-            double correction = this.c * Math.Pow(range, this.Gamma);
-
-            this.result[coordinates] = (byte)(correction * 255);
-
-            coordinates += 1;
-            b = buffer[coordinates];
-            range = (double)b / 255;
-            correction = this.c * Math.Pow(range, this.Gamma);
-           this.result[coordinates] = (byte)(correction * 255);
-
-            coordinates += 1;
-            b = buffer[coordinates];
-            range = (double)b / 255;
-            correction = this.c * Math.Pow(range, this.Gamma);
-            this.result[coordinates] = (byte)(correction * 255);
-
-            coordinates += 1;
-            this.result[coordinates] = 255;
-            //return changed;
-        }
+        //for showing corrected image
         private void SetCorrectedAfterImage(Bitmap correctedBitmap)
         {
             using (MemoryStream memory = new MemoryStream())
@@ -173,6 +141,17 @@ namespace ImageProsessingApp.Model
                 AfterImageSource = bitmapImage;
             }
         }
+
+        ///////////////////////////////////////////////////////////////////////----->ASM
+        [DllImport(@"C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\x64\Debug\IPAsm.dll")]
+        static extern int MyProc1(int a, int b);
+        public void ApplyGammaCorrectionInThreadsAsm(double c = 1d)
+        {
+            int x = 5, y = 4;
+            int retVal = MyProc1(x, y);
+            MessageBox.Show("Moja pierwsza wartość obliczona w asm to:"+retVal);
+        }
+        
        
     }
 }

@@ -545,11 +545,11 @@
                     <!--ddl choosing-->
                     <StackPanel Orientation="Horizontal" Margin="5">
                         <RadioButton VerticalContentAlignment="Center" Margin="2"
-                                 IsChecked="{Binding AsmDDLChosen}">
+                                 IsChecked="{Binding AsmDLLChosen}">
                             Asm DDL
                         </RadioButton>
                         <RadioButton VerticalContentAlignment="Center"  Margin="2"
-                                 IsChecked="{Binding CDDLChosen}">
+                                 IsChecked="{Binding CDLLChosen}">
                             C# DDL
                         </RadioButton>
                     </StackPanel>
