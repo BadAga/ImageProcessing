@@ -77,7 +77,7 @@ namespace ImageProsessingApp.Model
             SourceBitmap.UnlockBits(srcData);
 
             var watch = new System.Diagnostics.Stopwatch();
-            int stride = srcData.Stride;
+            int stride = srcData.Stride; //szerokość
 
             List<WaitHandle> waitingRoomList = new List<WaitHandle>();
             MultithreadingManager manager = MultithreadingManager.Instance;
@@ -86,9 +86,9 @@ namespace ImageProsessingApp.Model
 
             for (int y = 0; y < height; y++)
             {
-                int prev = y * stride;
+                int prev = y * stride; 
 
-                GammaCorrectonC gmccBlock = new GammaCorrectonC(width, prev, ref this.result, ref this.buffer, this.Gamma);
+                GammaCorrectonC gmccBlock = new GammaCorrectonC(stride, prev, ref this.result, ref this.buffer, this.Gamma);
                 Action action =()=> gmccBlock.BlockCorrection();
                 PixelBlockChange pChange = new PixelBlockChange(action);
 
@@ -147,6 +147,8 @@ namespace ImageProsessingApp.Model
         static extern int MyProc1(int a, int b);
         public void ApplyGammaCorrectionInThreadsAsm(double c = 1d)
         {
+            int[] blockOfPixels = new int[64]; 
+
             int x = 5, y = 4;
             int retVal = MyProc1(x, y);
             MessageBox.Show("Moja pierwsza wartość obliczona w asm to:"+retVal);
