@@ -1,0 +1,6 @@
+C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\IPCDll\bin\Release\IPCDll.dll
+C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\IPCDll\bin\Release\IPCDll.pdb
+C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\IPCDll\obj\Release\IPCDll.csproj.AssemblyReference.cache
+C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\IPCDll\obj\Release\IPCDll.csproj.CoreCompileInputs.cache
+C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\IPCDll\obj\Release\IPCDll.dll
+C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\IPCDll\obj\Release\IPCDll.pdb

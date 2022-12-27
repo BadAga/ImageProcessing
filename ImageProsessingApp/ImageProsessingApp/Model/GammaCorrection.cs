@@ -61,7 +61,7 @@ namespace ImageProsessingApp.Model
         }
 
         //main algorithm
-        public void ApplyGammaCorrectionInThreadsC(double c = 1d)
+        public void ApplyGammaCorrectionInThreadsC(double c = 1d,bool asm=false)
         {
             int width = SourceBitmap.Width;
             int height = SourceBitmap.Height;
@@ -88,7 +88,7 @@ namespace ImageProsessingApp.Model
             {
                 int prev = y * stride; 
 
-                GammaCorrectonC gmccBlock = new GammaCorrectonC(stride, prev, ref this.result, ref this.buffer, this.Gamma);
+                GammaCorrectionC gmccBlock = new GammaCorrectionC(stride, prev, ref this.result, ref this.buffer, this.Gamma);
                 Action action =()=> gmccBlock.BlockCorrection();
                 PixelBlockChange pChange = new PixelBlockChange(action);
 
@@ -143,17 +143,24 @@ namespace ImageProsessingApp.Model
         }
 
         ///////////////////////////////////////////////////////////////////////----->ASM
-        [DllImport(@"C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\x64\Debug\IPAsm.dll")]
-        static extern int MyProc1(int a, int b);
-        public void ApplyGammaCorrectionInThreadsAsm(double c = 1d)
+        [DllImport(@"C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\x64\Debug\AsmDLL.dll")]
+        static extern void MyProc(float[] cmp, float[] adder);
+        public void ApplyGammaCorrectionInThreadsAsm(float c = 1f)
         {
-            int[] blockOfPixels = new int[64]; 
+            float[] correctionTable = new float[255]; 
+            for(int i=0;i<correctionTable.Length;i++)
+            {
+                float range = (float)i/ 255;
+                float correction = (float)(c * Math.Pow(range, this.Gamma));
+                correctionTable[i] = correction;
+            }
+            float[] correctedPixelsArr = { 1.2f, 2.1f, 5.6f, 5.4f};
+            float[] result = new float[4];
+            int x = 2, y = 3;
+            MyProc(correctedPixelsArr, result);
+            float[] result2 = result;
 
-            int x = 5, y = 4;
-            int retVal = MyProc1(x, y);
-            MessageBox.Show("Moja pierwsza wartość obliczona w asm to:"+retVal);
-        }
-        
+        }        
        
     }
 }

@@ -1,0 +1,4 @@
+﻿  Assembling asmdll.asm...
+     Trwa tworzenie biblioteki C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\x64\Release\AsmDLL.lib i obiektu C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\x64\Release\AsmDLL.exp
+  LINK : określono opcję /LTCG, lecz generowanie kodu nie było wymagane; usuń opcję /LTCG z wiersza polecenia konsolidatora w celu podwyższenia wydajności konsolidatora
+  AsmDLL.vcxproj -> C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\x64\Release\AsmDLL.dll

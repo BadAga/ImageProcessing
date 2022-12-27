@@ -10,7 +10,7 @@ using System.Windows.Media.Imaging;
 
 namespace IPCDll
 {
-    public class GammaCorrectonC
+    public class GammaCorrectionC
     {
         private int width;
         private int prev;
@@ -19,7 +19,7 @@ namespace IPCDll
         private byte[] tempResult;
         private double gammaExponent;
 
-        public GammaCorrectonC(int width, int prev, ref byte[] result,ref byte[] buffer, double gammaExponent)
+        public GammaCorrectionC(int width, int prev, ref byte[] result,ref byte[] buffer, double gammaExponent)
         {
             this.width = width;
             this.prev = prev;
@@ -32,14 +32,12 @@ namespace IPCDll
         {
             for (int x = 0; x < width; x++)
             {
-                //int currentCoordinates = this.prev + x * 4;
                 int currentCoordinates = this.prev + x;
                 bool forth = false;
                 if ((currentCoordinates + 1) % 4 == 0)
                 {
                     forth = true;
                 }
-                //PixelCorrection(currentCoordinates);
                 SinglePixelCorrection(currentCoordinates, forth);
             }
         }
@@ -77,26 +75,6 @@ namespace IPCDll
                     coordinates++;
                 }
             }
-            //byte b = tempResult[coordinates];
-            //double range = (double)b / 255;
-            //double correction = c * Math.Pow(range, this.gammaExponent);
-
-            //this.result[coordinates] = (byte)(correction * 255);
-
-            //coordinates += 1;
-            //b = tempResult[coordinates];
-            //range = (double)b / 255;
-            //correction = c * Math.Pow(range, this.gammaExponent);
-            //this.result[coordinates] = (byte)(correction * 255);
-
-            //coordinates += 1;
-            //b = tempResult[coordinates];
-            //range = (double)b / 255;
-            //correction = c * Math.Pow(range, this.gammaExponent);
-            //this.result[coordinates] = (byte)(correction * 255);
-
-            //coordinates += 1;
-            //this.result[coordinates] = 255;
         }
     }
 }
