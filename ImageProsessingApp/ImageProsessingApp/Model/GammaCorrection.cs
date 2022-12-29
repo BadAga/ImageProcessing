@@ -11,6 +11,7 @@ using ImageProsessingApp.Model.Multithreading;
 using IPCDll;
 using ImageProsessingApp.Model.Mulithraeding;
 using System.Windows;
+using System.Collections.ObjectModel;
 
 namespace ImageProsessingApp.Model
 {
@@ -30,12 +31,9 @@ namespace ImageProsessingApp.Model
 
         private byte[] result;
 
-        private double c = 1d;
-
-        private byte b = new byte();
         private byte[] buffer;
-        private int coordinates = 0;
 
+        private bool dllC; //false->asm true->c#
         public GammaCorrection()
         {
             this.BeforeImageSource = string.Empty;
@@ -43,13 +41,14 @@ namespace ImageProsessingApp.Model
             SourceBitmap =null;
         }
 
-        public GammaCorrection(string beforeImageSource,double gammaParam,int numberOfThreads)
+        public GammaCorrection(string beforeImageSource,double gammaParam,int numberOfThreads,bool dll)
         {
             this.BeforeImageSource = beforeImageSource;
             this.SourceBitmap = (Bitmap)Image.FromFile(beforeImageSource);
             this.ResultsFilename = String.Empty;
             this.Gamma = gammaParam;
-            this.NumberOfThreads = numberOfThreads;           
+            this.NumberOfThreads = numberOfThreads;
+            this.dllC = dll;
         }
         public void SetBitmap()
         {
@@ -77,23 +76,45 @@ namespace ImageProsessingApp.Model
             SourceBitmap.UnlockBits(srcData);
 
             var watch = new System.Diagnostics.Stopwatch();
-            int stride = srcData.Stride; //szerokość
+            int stride = srcData.Stride; //width*4 (rgba)
 
+            //preparing for multithreading
             List<WaitHandle> waitingRoomList = new List<WaitHandle>();
             MultithreadingManager manager = MultithreadingManager.Instance;
             manager.UpdateThreadCount(this.NumberOfThreads);
+
+            float[] correctionArray = new float[255];
+            if (!dllC)
+            {
+                for (byte i = 0; i < 255; i++)
+                {
+                    float range = (float)i / 255;
+                    float correction = (float)(c * Math.Pow(range, this.Gamma));
+                    correctionArray[i] = correction;
+                }
+            }
             watch.Start();
 
             for (int y = 0; y < height; y++)
             {
-                int prev = y * stride; 
-
-                GammaCorrectionC gmccBlock = new GammaCorrectionC(stride, prev, ref this.result, ref this.buffer, this.Gamma);
-                Action action =()=> gmccBlock.BlockCorrection();
-                PixelBlockChange pChange = new PixelBlockChange(action);
-
-                WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
-                waitingRoomList.Add(currentWaitHandle);
+                int rowStartCor = y * stride;
+                if (dllC)
+                {
+                    GammaCorrectionC gmccBlock = new GammaCorrectionC(stride, rowStartCor, ref this.result, ref this.buffer, this.Gamma);
+                    Action action = () => gmccBlock.BlockCorrection();
+                    PixelBlockChange pChange = new PixelBlockChange(action);
+                    WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
+                    waitingRoomList.Add(currentWaitHandle);
+                }
+                else 
+                {
+                    GammaCorrectionAsm gmcAsmBlock = new GammaCorrectionAsm(stride, rowStartCor, ref this.result, ref this.buffer, this.Gamma,correctionArray);
+                    Action action = () => gmcAsmBlock.BlockCorrection();
+                    PixelBlockChange pChange = new PixelBlockChange(action);
+                    WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
+                    waitingRoomList.Add(currentWaitHandle);
+                }
+                
                 if (waitingRoomList.Count == 56)
                 {
                     foreach (var wh in waitingRoomList)
@@ -144,23 +165,20 @@ namespace ImageProsessingApp.Model
 
         ///////////////////////////////////////////////////////////////////////----->ASM
         [DllImport(@"C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\x64\Debug\AsmDLL.dll")]
-        static extern void MyProc(float[] cmp, float[] adder);
+        static extern int MyProc(float[] corArray, float[] resultPxArray, int startCoordinates,int picWidth);
         public void ApplyGammaCorrectionInThreadsAsm(float c = 1f)
         {
-            float[] correctionTable = new float[255]; 
-            for(int i=0;i<correctionTable.Length;i++)
+            float[] correctionArray = new float[255]; 
+            for(int i=0;i<correctionArray.Length;i++)
             {
-                float range = (float)i/ 255;
-                float correction = (float)(c * Math.Pow(range, this.Gamma));
-                correctionTable[i] = correction;
+                //float range = (float)i/ 255;
+                //float correction = (float)(c * Math.Pow(range, this.Gamma));
+                //correctionArray[i] = correction;
             }
-            float[] correctedPixelsArr = { 1.2f, 2.1f, 5.6f, 5.4f};
-            float[] result = new float[4];
-            int x = 2, y = 3;
-            MyProc(correctedPixelsArr, result);
-            float[] result2 = result;
 
+            float[] result = new float[4];
+            MyProc(correctionArray, result,2,3*4);
+            float[] result2 = result;
         }        
-       
     }
 }

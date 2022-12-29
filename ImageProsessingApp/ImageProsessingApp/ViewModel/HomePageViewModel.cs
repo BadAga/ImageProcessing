@@ -146,43 +146,35 @@ namespace ImageProsessingApp.ViewModel
                 if (open.ShowDialog() == true)
                     BeforeImagePath = open.FileName;
                     FilenameForTest = System.IO.Path.GetFileNameWithoutExtension(open.FileName);
-            }       
+            }
             private void RunCorraction(object o)
             {
                 if (this.beforeImagePath != null)
                 {
                     CanRun = false;
-                    if (this.CDLLChosen)
-                    {
-                        GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, this.NumberOfThreadsChosen);
-                        GCorecction.ApplyGammaCorrectionInThreadsC();
-                        this.ExecTime = GCorecction.ExecutionTime.ToString() + " s";
-                        this.AfterImagePath = GCorecction.GetCorrectedImageSource();
-                        CanSaveResult = true;
-                    }
-                    else if(this.AsmDLLChosen)
-                    {
-                        GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, this.NumberOfThreadsChosen);
-                        GCorecction.ApplyGammaCorrectionInThreadsAsm();
-                    }
-                    CanRun=true;
+                    GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, this.NumberOfThreadsChosen, CDLLChosen);
+                    GCorecction.ApplyGammaCorrectionInThreadsC();
+                    this.ExecTime = GCorecction.ExecutionTime.ToString() + " s";
+                    this.AfterImagePath = GCorecction.GetCorrectedImageSource();
+                    CanSaveResult = true;
+                    CanRun = true;
                 }
             }
             private void RunTests(object o)
             {
                 List<List<string>> list = new List<List<string>>();
                 if (this.beforeImagePath != null)
-                {                
+                {     
                     for (int i = 1; i < 65; i=i*2)
                     {
-                        List<string> listReultsPerThread = new List<string>();
+                        List<string> listResultsPerThread = new List<string>();
                         for (int j = 1; j <= 10; j++)
                         {
-                            GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, i);
+                            GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, i,CDLLChosen);
                             GCorecction.ApplyGammaCorrectionInThreadsC();
-                            listReultsPerThread.Add(GCorecction.ExecutionTime.ToString() + " s");
+                            listResultsPerThread.Add(GCorecction.ExecutionTime.ToString() + " s");
                         }
-                        list.Add(listReultsPerThread);
+                        list.Add(listResultsPerThread);
                     }
                 }
                 String date = DateTime.Now.Date.Day.ToString();

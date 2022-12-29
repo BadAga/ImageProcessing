@@ -16,7 +16,7 @@ namespace IPCDll
         private int prev;
 
         private byte[] result;
-        private byte[] tempResult;
+        private byte[] originalCopy;
         private double gammaExponent;
 
         public GammaCorrectionC(int width, int prev, ref byte[] result,ref byte[] buffer, double gammaExponent)
@@ -24,7 +24,7 @@ namespace IPCDll
             this.width = width;
             this.prev = prev;
             this.result = result;
-            this.tempResult = buffer;
+            this.originalCopy = buffer;
             this.gammaExponent = gammaExponent;
         }
 
@@ -46,7 +46,7 @@ namespace IPCDll
         {
             if (!forth)
             {
-                byte b = tempResult[coordinates];
+                byte b = originalCopy[coordinates];
                 double range = (double)b / 255;
                 double correction = c * Math.Pow(range, this.gammaExponent);
 
@@ -55,25 +55,6 @@ namespace IPCDll
             else
             {
                 this.result[coordinates] = 255;
-            }
-        }
-        private void PixelCorrection(int coordinates,double c=1d)
-        {
-            for(int i=0;i<4;i++)
-            {
-                if (i == 3)
-                {
-                    this.result[coordinates] = 255;
-                }
-                else
-                {
-                    byte b = tempResult[coordinates];
-                    double range = (double)b / 255;
-                    double correction = c * Math.Pow(range, this.gammaExponent);
-
-                    this.result[coordinates] = (byte)(correction * 255);
-                    coordinates++;
-                }
             }
         }
     }
