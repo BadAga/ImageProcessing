@@ -89,7 +89,7 @@ namespace ImageProsessingApp.ViewModel
             }
         }
 
-        private bool canRun = false;
+        private bool canRun = true;
         public bool CanRun
         {
             get { return canRun; }
