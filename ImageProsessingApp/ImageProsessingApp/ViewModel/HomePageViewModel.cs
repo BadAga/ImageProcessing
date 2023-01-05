@@ -16,13 +16,13 @@ using System.Windows.Media.Imaging;
 
 namespace ImageProsessingApp.ViewModel
 {
-    public class HomePageViewModel:ViewModelBase
+    public class HomePageViewModel : ViewModelBase
     {
         private int numberOfThreadsChosen;
         public int NumberOfThreadsChosen
         {
             get { return numberOfThreadsChosen; }
-            set 
+            set
             {
                 numberOfThreadsChosen = value;
                 OnPropertyChanged(nameof(NumberOfThreadsChosen));
@@ -36,7 +36,7 @@ namespace ImageProsessingApp.ViewModel
             set { numberOfThreads = value; OnPropertyChanged(nameof(NumberOfThreads)); }
         }
 
-        private double gammaParam=2.2;
+        private double gammaParam = 2.2;
         public double GammaParam
         {
             get { return gammaParam; }
@@ -46,7 +46,7 @@ namespace ImageProsessingApp.ViewModel
         private String beforeImagePath;
         public String BeforeImagePath
         {
-            get { return beforeImagePath;}
+            get { return beforeImagePath; }
             set { beforeImagePath = value; OnPropertyChanged(nameof(BeforeImagePath)); }
         }
 
@@ -57,7 +57,7 @@ namespace ImageProsessingApp.ViewModel
             set { afterImagePath = value; OnPropertyChanged(nameof(AfterImagePath)); }
         }
 
-        private bool cDLLChosen=false;//as default     
+        private bool cDLLChosen = false;//as default     
         public bool CDLLChosen
         {
             get { return cDLLChosen; }
@@ -68,12 +68,12 @@ namespace ImageProsessingApp.ViewModel
                     AsmDLLChosen = false;
                     CanRun = true;
                 }
-                cDLLChosen = value; 
+                cDLLChosen = value;
                 OnPropertyChanged(nameof(CDLLChosen));
             }
         }
 
-        private bool asmDLLChosen=false;//as default
+        private bool asmDLLChosen = false;//as default
         public bool AsmDLLChosen
         {
             get { return asmDLLChosen; }
@@ -89,7 +89,7 @@ namespace ImageProsessingApp.ViewModel
             }
         }
 
-        private bool canRun = true;
+        private bool canRun = false;
         public bool CanRun
         {
             get { return canRun; }
@@ -128,7 +128,7 @@ namespace ImageProsessingApp.ViewModel
             NumberOfThreadsChosen = Environment.ProcessorCount;
             NumberOfThreads = 64;
         }
-        
+
 
         //commands
 
@@ -137,82 +137,92 @@ namespace ImageProsessingApp.ViewModel
         public RelayCommand SaveImageCommand { get; }
         public RelayCommand TestCommand { get; }
 
-            private void LoadImage(object o)
-            {
-                OpenFileDialog open = new OpenFileDialog();
-                open.DefaultExt = (".png");
-                open.Filter = "Pictures (*.jpg;*.gif;*.png)|*.jpg;*.gif;*.png";
+        private void LoadImage(object o)
+        {
+            OpenFileDialog open = new OpenFileDialog();
+            open.DefaultExt = (".png");
+            open.Filter = "Pictures (*.jpg;*.gif;*.png)|*.jpg;*.gif;*.png";
 
-                if (open.ShowDialog() == true)
-                    BeforeImagePath = open.FileName;
-                    FilenameForTest = System.IO.Path.GetFileNameWithoutExtension(open.FileName);
-            }
-            private void RunCorraction(object o)
+            if (open.ShowDialog() == true)
+                BeforeImagePath = open.FileName;
+            FilenameForTest = System.IO.Path.GetFileNameWithoutExtension(open.FileName);
+        }
+        private void RunCorraction(object o)
+        {
+            if (this.beforeImagePath != null)
             {
-                if (this.beforeImagePath != null)
+                CanRun = false;
+                GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, this.NumberOfThreadsChosen);
+                if (CDLLChosen)
                 {
-                    CanRun = false;
-                    GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, this.NumberOfThreadsChosen, CDLLChosen);
+                    
                     GCorecction.ApplyGammaCorrectionInThreadsC();
-                    this.ExecTime = GCorecction.ExecutionTime.ToString() + " s";
-                    this.AfterImagePath = GCorecction.GetCorrectedImageSource();
-                    CanSaveResult = true;
-                    CanRun = true;
+                    
                 }
-            }
-            private void RunTests(object o)
-            {
-                List<List<string>> list = new List<List<string>>();
-                if (this.beforeImagePath != null)
-                {     
-                    for (int i = 1; i < 65; i=i*2)
-                    {
-                        List<string> listResultsPerThread = new List<string>();
-                        for (int j = 1; j <= 10; j++)
-                        {
-                            GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, i,CDLLChosen);
-                            GCorecction.ApplyGammaCorrectionInThreadsC();
-                            listResultsPerThread.Add(GCorecction.ExecutionTime.ToString() + " s");
-                        }
-                        list.Add(listResultsPerThread);
-                    }
-                }
-                String date = DateTime.Now.Date.Day.ToString();
-                date+="_"+DateTime.Now.Date.Month.ToString();
-                String filename = "Test_"+date+"_"+FilenameForTest+".txt";
-                TextWriter tw = new StreamWriter(filename);
-                int counter = 1;
-                foreach (var block in list)
+                else
                 {
-                    tw.WriteLine("Number of threads:" + counter.ToString());
-                    foreach (var result in block)
-                    {
-                        tw.Write(result.ToString());
-                        tw.Write("  ");
-                    }
-                    tw.WriteLine();
-                    counter = counter * 2;
+                    GCorecction.ApplyGammaCorrectionInThreadsAsm();
                 }
-                tw.Close();
+                this.ExecTime = GCorecction.ExecutionTime.ToString() + " s";
+                this.AfterImagePath = GCorecction.GetCorrectedImageSource();
 
+                CanSaveResult = true;
+                CanRun = true;
             }
-            private void SaveResultImage(object o)
+        }
+        private void RunTests(object o)
+        {
+            List<List<string>> list = new List<List<string>>();
+            if (this.beforeImagePath != null)
             {
-                SaveFileDialog save = new SaveFileDialog();
-                save.Title = "Save picture as ";
-                save.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp)|*.jpg; *.jpeg; *.gif; *.bmp";
-                if (GCorecction.ResultImage != null)
+                for (int i = 1; i < 65; i = i * 2)
                 {
-                    if (save.ShowDialog() == true)
+                    List<string> listResultsPerThread = new List<string>();
+                    for (int j = 1; j <= 10; j++)
                     {
-                        JpegBitmapEncoder jpg = new JpegBitmapEncoder();
-                        jpg.Frames.Add(BitmapFrame.Create(GCorecction.ResultImage));
-                        using (Stream stm = File.Create(save.FileName))
-                        {
-                            jpg.Save(stm);
-                        }
+                        GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, i);
+                        GCorecction.ApplyGammaCorrectionInThreadsC();
+                        listResultsPerThread.Add(GCorecction.ExecutionTime.ToString() + " s");
+                    }
+                    list.Add(listResultsPerThread);
+                }
+            }
+            String date = DateTime.Now.Date.Day.ToString();
+            date += "_" + DateTime.Now.Date.Month.ToString();
+            String filename = "Test_" + date + "_" + FilenameForTest + ".txt";
+            TextWriter tw = new StreamWriter(filename);
+            int counter = 1;
+            foreach (var block in list)
+            {
+                tw.WriteLine("Number of threads:" + counter.ToString());
+                foreach (var result in block)
+                {
+                    tw.Write(result.ToString());
+                    tw.Write("  ");
+                }
+                tw.WriteLine();
+                counter = counter * 2;
+            }
+            tw.Close();
+
+        }
+        private void SaveResultImage(object o)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Title = "Save picture as ";
+            save.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp)|*.jpg; *.jpeg; *.gif; *.bmp";
+            if (GCorecction.ResultImage != null)
+            {
+                if (save.ShowDialog() == true)
+                {
+                    JpegBitmapEncoder jpg = new JpegBitmapEncoder();
+                    jpg.Frames.Add(BitmapFrame.Create(GCorecction.ResultImage));
+                    using (Stream stm = File.Create(save.FileName))
+                    {
+                        jpg.Save(stm);
                     }
                 }
             }
+        }
     }
 }

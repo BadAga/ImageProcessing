@@ -32,8 +32,6 @@ namespace ImageProsessingApp.Model
         private byte[] result;
 
         private byte[] buffer;
-
-        private bool dllC; //false->asm true->c#
         public GammaCorrection()
         {
             this.BeforeImageSource = string.Empty;
@@ -41,14 +39,13 @@ namespace ImageProsessingApp.Model
             SourceBitmap =null;
         }
 
-        public GammaCorrection(string beforeImageSource,double gammaParam,int numberOfThreads,bool dll)
+        public GammaCorrection(string beforeImageSource,double gammaParam,int numberOfThreads)
         {
             this.BeforeImageSource = beforeImageSource;
             this.SourceBitmap = (Bitmap)Image.FromFile(beforeImageSource);
             this.ResultsFilename = String.Empty;
             this.Gamma = gammaParam;
             this.NumberOfThreads = numberOfThreads;
-            this.dllC = dll;
         }
         public void SetBitmap()
         {
@@ -60,7 +57,7 @@ namespace ImageProsessingApp.Model
         }
 
         //main algorithm
-        public void ApplyGammaCorrectionInThreadsC(double c = 1d,bool asm=false)
+        public void ApplyGammaCorrectionInThreadsC(double c = 1d)
         {
             int width = SourceBitmap.Width;
             int height = SourceBitmap.Height;
@@ -83,38 +80,19 @@ namespace ImageProsessingApp.Model
             MultithreadingManager manager = MultithreadingManager.Instance;
             manager.UpdateThreadCount(this.NumberOfThreads);
 
-            float[] correctionArray = new float[255];
-            if (!dllC)
-            {
-                for (byte i = 0; i < 255; i++)
-                {
-                    float range = (float)i / 255;
-                    float correction = (float)(c * Math.Pow(range, this.Gamma));
-                    correctionArray[i] = correction;
-                }
-            }
+            
             watch.Start();
 
             for (int y = 0; y < height; y++)
             {
                 int rowStartCor = y * stride;
-                if (dllC)
-                {
-                    GammaCorrectionC gmccBlock = new GammaCorrectionC(stride, rowStartCor, ref this.result, ref this.buffer, this.Gamma);
-                    Action action = () => gmccBlock.BlockCorrection();
-                    PixelBlockChange pChange = new PixelBlockChange(action);
-                    WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
-                    waitingRoomList.Add(currentWaitHandle);
-                }
-                else 
-                {
-                    GammaCorrectionAsm gmcAsmBlock = new GammaCorrectionAsm(stride, rowStartCor, ref this.result, ref this.buffer, this.Gamma,correctionArray);
-                    Action action = () => gmcAsmBlock.BlockCorrection();
-                    PixelBlockChange pChange = new PixelBlockChange(action);
-                    WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
-                    waitingRoomList.Add(currentWaitHandle);
-                }
-                
+
+                GammaCorrectionC gmccBlock = new GammaCorrectionC(stride, rowStartCor, ref this.result, ref this.buffer, this.Gamma);
+                Action action = () => gmccBlock.BlockCorrection();
+                PixelBlockChange pChange = new PixelBlockChange(action);
+                WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
+                waitingRoomList.Add(currentWaitHandle);
+
                 if (waitingRoomList.Count == 56)
                 {
                     foreach (var wh in waitingRoomList)
@@ -146,6 +124,93 @@ namespace ImageProsessingApp.Model
             resImg.UnlockBits(resData);
             this.SetCorrectedAfterImage(resImg);
         }
+
+        public void ApplyGammaCorrectionInThreadsAsm(double c = 1d)
+        {
+            int width = SourceBitmap.Width;
+            int height = SourceBitmap.Height;
+            BitmapData srcData = SourceBitmap.LockBits(new Rectangle(0, 0, width, height),
+                                                 ImageLockMode.ReadOnly,
+                                                 System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            int bytes = srcData.Stride * srcData.Height;
+
+            this.buffer = new byte[bytes];
+            this.result = new byte[bytes];
+
+            Marshal.Copy(srcData.Scan0, this.buffer, 0, bytes);
+            SourceBitmap.UnlockBits(srcData);
+
+            var watch = new System.Diagnostics.Stopwatch();
+            int stride = srcData.Stride; //width*4 (rgba)
+
+            //preparing for multithreading
+            List<WaitHandle> waitingRoomList = new List<WaitHandle>();
+            MultithreadingManager manager = MultithreadingManager.Instance;
+            manager.UpdateThreadCount(this.NumberOfThreads);
+
+            float[] correctionArray = new float[255];
+
+            for (byte i = 0; i < 255; i++)
+            {
+                float range = (float)i / 255;
+                float correction = (float)(c * Math.Pow(range, this.Gamma));
+                correctionArray[i] = correction;
+            }
+            float[] resultFloat = new float[bytes];
+            int[] bufferFloat = new int[bytes];
+            for (int i = 0; i < bytes; i++)
+            {
+                bufferFloat[i] = (int)buffer[i];
+            }
+            watch.Start();
+
+            for (int y = 0; y < height; y++)
+            {
+                int rowStartCor = y * stride;
+
+                GammaCorrectionAsm gmcAsmBlock = new GammaCorrectionAsm(stride, rowStartCor, ref resultFloat, ref bufferFloat, this.Gamma, correctionArray);
+                Action action = () => gmcAsmBlock.BlockCorrection();
+                PixelBlockChange pChange = new PixelBlockChange(action);
+                WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
+                waitingRoomList.Add(currentWaitHandle);
+
+
+                if (waitingRoomList.Count == 56)
+                {
+                    foreach (var wh in waitingRoomList)
+                    {
+                        wh.WaitOne();
+                    }
+                    waitingRoomList.Clear();
+                }
+            }
+
+            if (waitingRoomList.Count != 0)
+            {
+                foreach (var wh in waitingRoomList)
+                {
+                    wh.WaitOne();
+                }
+                waitingRoomList.Clear();
+            }
+            
+            watch.Stop();
+            ExecutionTime = (double)watch.ElapsedMilliseconds / 1000;
+
+            for (int i = 0; i < bytes; i++)
+            {
+                this.result[i] = (byte)resultFloat[i];
+            }
+            Bitmap resImg = new Bitmap(width, height);
+
+            BitmapData resData = resImg.LockBits(new Rectangle(0, 0, width, height),
+                                                ImageLockMode.WriteOnly,
+                                                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            Marshal.Copy(result, 0, resData.Scan0, bytes);
+            resImg.UnlockBits(resData);
+            this.SetCorrectedAfterImage(resImg);
+        }
         //for showing corrected image
         private void SetCorrectedAfterImage(Bitmap correctedBitmap)
         {
@@ -162,23 +227,6 @@ namespace ImageProsessingApp.Model
                 AfterImageSource = bitmapImage;
             }
         }
-
-        ///////////////////////////////////////////////////////////////////////----->ASM
-        [DllImport(@"C:\Users\agnie\source\repos\JA\PROJ-5SEM\ImageProcessing\ImageProsessingApp\x64\Debug\AsmDLL.dll")]
-        static extern int MyProc(float[] corArray, float[] resultPxArray, int startCoordinates,int picWidth);
-        public void ApplyGammaCorrectionInThreadsAsm(float c = 1f)
-        {
-            float[] correctionArray = new float[255]; 
-            for(int i=0;i<correctionArray.Length;i++)
-            {
-                //float range = (float)i/ 255;
-                //float correction = (float)(c * Math.Pow(range, this.Gamma));
-                //correctionArray[i] = correction;
-            }
-
-            float[] result = new float[4];
-            MyProc(correctionArray, result,2,3*4);
-            float[] result2 = result;
-        }        
+     
     }
 }

@@ -28,33 +28,33 @@ namespace IPCDll
             this.gammaExponent = gammaExponent;
         }
 
-        public void BlockCorrection()
+        public void BlockCorrection(double c = 1d)
         {
-            for (int x = 0; x < width; x++)
+            for (int i = 0; i < width; i += 4)
             {
-                int currentCoordinates = this.prev + x;
-                bool forth = false;
-                if ((currentCoordinates + 1) % 4 == 0)
-                {
-                    forth = true;
-                }
-                SinglePixelCorrection(currentCoordinates, forth);
-            }
-        }
-
-        private void SinglePixelCorrection(int coordinates, bool forth,double c = 1d)
-        {
-            if (!forth)
-            {
-                byte b = originalCopy[coordinates];
+                int currentCoordinates = this.prev+i;
+                byte b = originalCopy[currentCoordinates];
                 double range = (double)b / 255;
                 double correction = c * Math.Pow(range, this.gammaExponent);
 
-                this.result[coordinates] = (byte)(correction * 255);
-            }
-            else
-            {
-                this.result[coordinates] = 255;
+                this.result[currentCoordinates] = (byte)(correction * 255);
+
+                currentCoordinates++;
+                b = originalCopy[currentCoordinates];
+                range = (double)b / 255;
+                correction = c * Math.Pow(range, this.gammaExponent);
+
+                this.result[currentCoordinates] = (byte)(correction * 255);
+
+                currentCoordinates++;
+                b = originalCopy[currentCoordinates];
+                range = (double)b / 255;
+                correction = c * Math.Pow(range, this.gammaExponent);
+
+                this.result[currentCoordinates] = (byte)(correction * 255);
+
+                currentCoordinates++;
+                this.result[currentCoordinates] = 255;
             }
         }
     }
