@@ -546,11 +546,11 @@
                     <StackPanel Orientation="Horizontal" Margin="5">
                         <RadioButton VerticalContentAlignment="Center" Margin="2"
                                  IsChecked="{Binding AsmDLLChosen}">
-                            Asm DDL
+                            Asm DLL
                         </RadioButton>
                         <RadioButton VerticalContentAlignment="Center"  Margin="2"
                                  IsChecked="{Binding CDLLChosen}">
-                            C# DDL
+                            C# DLL
                         </RadioButton>
                     </StackPanel>
                     <!--param choosing-->

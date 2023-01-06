@@ -13,14 +13,13 @@
     ProcessRow: cmp r12, r9
                 je Finish                
 
-                mov r13,r12             ;get adress of rdx
-                add r13,rdx             ;add counter to rdx adress
+                mov r13,r12             ;get adress of original row
+                add r13,rdx             ;get adress of original cell
                 
-                mov eax,dword ptr [r13] ;get value at said adress index= of correction table
+                mov eax,dword ptr [r13] ;get value at said adress= index of correction table
                 shl eax,2
                                         ;get adress of correction table cell at said index
-                mov dword ptr[r13],eax
-                
+               ; mov dword ptr[r13],eax              
                 
 
                 add r11,1

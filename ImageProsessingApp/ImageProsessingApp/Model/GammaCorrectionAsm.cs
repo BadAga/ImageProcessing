@@ -46,6 +46,10 @@ namespace ImageProsessingApp.Model
 
         public void BlockCorrection(float c = 1f)
         {
+            if(this.prev> 490000)
+            {
+                Console.WriteLine("asd");
+            }
             float[] resultRow = new float[width];
             int[] originalCopyRow = new int[width];
             for (int i = 0; i < width; i++)
