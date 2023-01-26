@@ -172,16 +172,34 @@ namespace ImageProsessingApp.ViewModel
         }
         private void RunTests(object o)
         {
+            string filename = "Test";
             List<List<string>> list = new List<List<string>>();
+            if(CDLLChosen)
+            {
+                filename += "_Cszarp_";
+            }
+            else
+            {
+                filename += "_Asm_";
+            }
             if (this.beforeImagePath != null)
             {
+
                 for (int i = 1; i < 65; i = i * 2)
                 {
                     List<string> listResultsPerThread = new List<string>();
                     for (int j = 1; j <= 10; j++)
                     {
                         GCorecction = new GammaCorrection(this.BeforeImagePath, this.GammaParam, i);
-                        GCorecction.ApplyGammaCorrectionInThreadsC();
+                        if(CDLLChosen)
+                        {
+                            GCorecction.ApplyGammaCorrectionInThreadsC();
+                        }
+                        else 
+                        {
+                            GCorecction.ApplyGammaCorrectionInThreadsAsm();
+                        }
+                        
                         listResultsPerThread.Add(GCorecction.ExecutionTime.ToString() + " s");
                     }
                     list.Add(listResultsPerThread);
@@ -189,7 +207,7 @@ namespace ImageProsessingApp.ViewModel
             }
             String date = DateTime.Now.Date.Day.ToString();
             date += "_" + DateTime.Now.Date.Month.ToString();
-            String filename = "Test_" + date + "_" + FilenameForTest + ".txt";
+            filename +=  date + "_" + FilenameForTest + ".txt";
             TextWriter tw = new StreamWriter(filename);
             int counter = 1;
             foreach (var block in list)

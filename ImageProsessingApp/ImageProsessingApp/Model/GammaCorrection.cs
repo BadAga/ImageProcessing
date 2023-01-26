@@ -80,14 +80,30 @@ namespace ImageProsessingApp.Model
             MultithreadingManager manager = MultithreadingManager.Instance;
             manager.UpdateThreadCount(this.NumberOfThreads);
 
-            
+            int step = 1;
+            if(height % 5==0)
+            {
+                step = 5;
+            }
+            else if(height % 4 == 0)
+            {
+                step = 4;
+            }
+            else if (height % 3 == 0)
+            {
+                step = 3;
+            }
+            else if (height % 2 == 0)
+            {
+                step = 2;
+            }
             watch.Start();
 
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < height; y+=step)
             {
                 int rowStartCor = y * stride;
 
-                GammaCorrectionC gmccBlock = new GammaCorrectionC(stride, rowStartCor, ref this.result, ref this.buffer, this.Gamma);
+                GammaCorrectionC gmccBlock = new GammaCorrectionC(stride*step, rowStartCor, ref this.result, ref this.buffer, this.Gamma);
                 Action action = () => gmccBlock.BlockCorrection();
                 PixelBlockChange pChange = new PixelBlockChange(action);
                 WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
@@ -162,13 +178,31 @@ namespace ImageProsessingApp.Model
             {
                 bufferFloat[i] = (int)buffer[i];
             }
+
+            int step = 1;
+            if (height % 5 == 0)
+            {
+                step = 5;
+            }
+            else if (height % 4 == 0)
+            {
+                step = 4;
+            }
+            else if (height % 3 == 0)
+            {
+                step = 3;
+            }
+            else if (height % 2 == 0)
+            {
+                step = 2;
+            }
             watch.Start();
 
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < height; y+=step)
             {
                 int rowStartCor = y * stride;
 
-                GammaCorrectionAsm gmcAsmBlock = new GammaCorrectionAsm(stride, rowStartCor, ref resultFloat, ref bufferFloat, this.Gamma, correctionArray);
+                GammaCorrectionAsm gmcAsmBlock = new GammaCorrectionAsm(stride*step, rowStartCor, ref resultFloat, ref bufferFloat, this.Gamma, correctionArray);
                 Action action = () => gmcAsmBlock.BlockCorrection();
                 PixelBlockChange pChange = new PixelBlockChange(action);
                 WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);

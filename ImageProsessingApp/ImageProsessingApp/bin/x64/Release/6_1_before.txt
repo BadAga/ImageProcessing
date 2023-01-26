@@ -1,0 +1,14 @@
+Number of threads:1
+0.059 s  0.042 s  0.041 s  0.042 s  0.042 s  0.042 s  0.044 s  0.042 s  0.044 s  0.043 s  
+Number of threads:2
+0.035 s  0.026 s  0.024 s  0.025 s  0.024 s  0.024 s  0.031 s  0.025 s  0.025 s  0.037 s  
+Number of threads:4
+0.043 s  0.019 s  0.018 s  0.021 s  0.021 s  0.017 s  0.016 s  0.018 s  0.019 s  0.018 s  
+Number of threads:8
+0.042 s  0.013 s  0.011 s  0.016 s  0.095 s  0.011 s  0.011 s  0.012 s  0.012 s  0.011 s  
+Number of threads:16
+0.164 s  0.107 s  0.483 s  0.139 s  0.291 s  0.213 s  0.013 s  0.179 s  0.122 s  0.013 s  
+Number of threads:32
+0.161 s  0.013 s  0.115 s  0.444 s  0.333 s  0.274 s  0.013 s  0.24 s  0.185 s  0.231 s  
+Number of threads:64
+0.103 s  0.029 s  0.281 s  0.034 s  0.575 s  0.337 s  0.479 s  0.014 s  0.295 s  0.596 s  

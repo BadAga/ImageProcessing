@@ -19,8 +19,7 @@
                 mov eax,dword ptr [r13] ;get value at said adress= index of correction table
                 shl eax,2
                                         ;get adress of correction table cell at said index
-               ; mov dword ptr[r13],eax              
-                
+               ; mov dword ptr[r13],eax                              
 
                 add r11,1
                 cmp r11,4
