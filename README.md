@@ -20,4 +20,8 @@ This WPF project offers the following features:
 
 ## Usage
 
-To use the application correctly, first select picture to be corrected via file dialog then the option to execute the implemented algorithm with either a C# DLL or assembly DLL. Next you can choose number of threads processing the image. Finally, you can apply the gamma correction to the bitmap by clicking Run button and view the corrected image and execution time.
+To use the application correctly, first select picture to be corrected via file dialog then the option to execute the implemented algorithm with either a C# DLL or assembly DLL. Next you can choose number of threads processing the image. Finally, you can apply the gamma correction to the bitmap by clicking <em>Run</em> button and view the corrected image and execution time.
+
+Here's what you'll see after setting up and running the correction: 
+
+![app_view](https://user-images.githubusercontent.com/72341763/219368735-d63e101c-42c6-4c22-b7e3-57286a452510.png)
