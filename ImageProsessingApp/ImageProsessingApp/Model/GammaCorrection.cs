@@ -109,7 +109,7 @@ namespace ImageProsessingApp.Model
                 WaitHandle currentWaitHandle = manager.AddPixelChange(pChange);
                 waitingRoomList.Add(currentWaitHandle);
 
-                if (waitingRoomList.Count == 56)
+                if (waitingRoomList.Count == 63)
                 {
                     foreach (var wh in waitingRoomList)
                     {
@@ -164,6 +164,7 @@ namespace ImageProsessingApp.Model
             MultithreadingManager manager = MultithreadingManager.Instance;
             manager.UpdateThreadCount(this.NumberOfThreads);
 
+            //correction array (look up table) for ASM algorithm
             float[] correctionArray = new float[255];
 
             for (byte i = 0; i < 255; i++)
@@ -172,6 +173,7 @@ namespace ImageProsessingApp.Model
                 float correction = (float)(c * Math.Pow(range, this.Gamma));
                 correctionArray[i] = correction;
             }
+            //temp buffer also for ASM algorithm
             float[] resultFloat = new float[bytes];
             int[] bufferFloat = new int[bytes];
             for (int i = 0; i < bytes; i++)
@@ -179,6 +181,7 @@ namespace ImageProsessingApp.Model
                 bufferFloat[i] = (int)buffer[i];
             }
 
+            //number of rows to be processed in single action 
             int step = 1;
             if (height % 5 == 0)
             {
